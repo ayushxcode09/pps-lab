@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPS Practice Lab — BIT Mesra</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #111213;
+  --surface: #1a1b1e;
+  --surface2: #222428;
+  --border: #2a2d32;
+  --border2: #383c42;
+  --text: #e2e4e8;
+  --muted: #666c75;
+  --dim: #4a5058;
+  --accent: #5b8af0;
+  --green: #3eb489;
+  --amber: #e8a045;
+  --red: #e05c5c;
+  --fire: #f07043;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* HEADER */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left { display: flex; align-items: center; gap: 12px; }
+
+.logo-mark {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--accent);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.header-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+.header-sub {
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+
+.progress-pill {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.progress-pill span { color: var(--accent); font-weight: 600; }
+
+/* MAIN LAYOUT */
+.layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: calc(100vh - 61px);
+}
+
+/* SIDEBAR */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 16px 0;
+  position: sticky;
+  top: 61px;
+  height: calc(100vh - 61px);
+  overflow-y: auto;
+}
+
+.sidebar-section {
+  padding: 6px 16px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 8px;
+}
+
+.sidebar-topic {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-left: 2px solid transparent;
+}
+.sidebar-topic:hover { background: var(--surface2); }
+.sidebar-topic.active {
+  background: var(--surface2);
+  border-left-color: var(--accent);
+}
+
+.topic-name-wrap { display: flex; align-items: center; gap: 8px; }
+.topic-icon { font-size: 14px; }
+.topic-name { font-size: 13px; font-weight: 500; }
+
+.topic-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--bg);
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.topic-badge.done { color: var(--green); border-color: rgba(62,180,137,0.3); }
+
+/* CONTENT */
+.content {
+  padding: 24px;
+  max-width: 900px;
+}
+
+.topic-header {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.topic-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.topic-desc {
+  font-size: 13px;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+
+/* QUESTION LIST */
+.q-list { display: flex; flex-direction: column; gap: 10px; }
+
+.q-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.q-row:hover { border-color: var(--border2); }
+.q-row.solved { border-color: rgba(62,180,137,0.25); }
+
+.q-row-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  cursor: pointer;
+}
+
+.q-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+  min-width: 20px;
+}
+
+.q-row-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.priority-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.fire-dot { background: var(--fire); }
+.high-dot { background: var(--amber); }
+.med-dot { background: var(--accent); }
+
+.priority-label {
+  font-size: 11px;
+  font-family: var(--mono);
+  padding: 2px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.pl-fire { background: rgba(240,112,67,0.12); color: var(--fire); }
+.pl-high { background: rgba(232,160,69,0.12); color: var(--amber); }
+.pl-med  { background: rgba(91,138,240,0.12); color: var(--accent); }
+
+.solved-mark {
+  font-size: 12px;
+  color: var(--green);
+  font-family: var(--mono);
+  display: none;
+}
+.q-row.solved .solved-mark { display: block; }
+
+.chevron {
+  color: var(--dim);
+  font-size: 12px;
+  transition: transform 0.2s;
+}
+.q-row.open .chevron { transform: rotate(90deg); }
+
+/* EXPANDED AREA */
+.q-expand {
+  display: none;
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+}
+.q-row.open .q-expand { display: block; }
+
+.expand-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 12px 0 10px;
+}
+
+.etab {
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.etab:hover { border-color: var(--border2); color: var(--text); }
+.etab.active { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Code editor */
+.code-wrap {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.file-bar {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  padding: 6px 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-dots { display: flex; gap: 5px; }
+.fdot { width: 9px; height: 9px; border-radius: 50%; }
+
+textarea.editor {
+  width: 100%;
+  min-height: 260px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0 0 6px 6px;
+  padding: 14px 16px;
+  color: #cdd6e8;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.7;
+  resize: vertical;
+  outline: none;
+  tab-size: 4;
+  transition: border-color 0.15s;
+}
+textarea.editor:focus { border-color: var(--accent); }
+
+pre.code-block {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0 0 6px 6px;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: #a8d8b9;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.hint-text {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0 0 6px 6px;
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.8;
+  color: var(--muted);
+  white-space: pre-wrap;
+}
+
+.action-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+.btn-solve {
+  background: var(--green);
+  color: #0d1f17;
+  border-color: var(--green);
+}
+.btn-solve:hover { background: #35a07a; }
+.btn-unsolved {
+  background: transparent;
+  color: var(--muted);
+}
+.btn-unsolved:hover { color: var(--text); border-color: var(--border2); }
+
+/* Panel visibility */
+.topic-panel { display: none; }
+.topic-panel.active { display: block; }
+
+/* Legend */
+.legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.leg { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); }
+.leg-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* Mobile */
+@media (max-width: 640px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    padding: 8px;
+    gap: 4px;
+  }
+  .sidebar-section { display: none; }
+  .sidebar-topic {
+    border-left: none;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+  }
+  .sidebar-topic.active { background: var(--surface2); border-color: var(--accent); }
+  .content { padding: 16px; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo-mark">PPS</div>
+    <div>
+      <div class="header-title">Practice Lab</div>
+      <div class="header-sub">BIT Mesra · Dev C++ · End Sem 2026</div>
+    </div>
+  </div>
+  <div class="progress-pill">
+    solved: <span id="prog-text">0 / 22</span>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="content" id="main-content"></main>
+</div>
+
+<script>
+const data = [
+  {
+    id: 'ifelse', icon: '🔀', name: 'If-Else / Switch',
+    desc: 'Module II — Conditional branching',
+    qs: [
+      { id:'q01', title:'Largest of 3 Numbers', p:'fire',
+        hint:`Steps:\n1. Input three numbers: a, b, c\n2. if(a > b && a > c)  →  a is largest\n3. else if(b > c)       →  b is largest\n4. else                →  c is largest\n\nTwist to expect: "find largest WITHOUT using &&"\n→ Use nested if inside if-else`,
+        sol:`#include<stdio.h>\nint main() {\n    int a, b, c;\n    printf("Enter 3 numbers: ");\n    scanf("%d %d %d", &a, &b, &c);\n\n    if(a > b && a > c)\n        printf("Largest = %d", a);\n    else if(b > c)\n        printf("Largest = %d", b);\n    else\n        printf("Largest = %d", c);\n\n    return 0;\n}`},
+      { id:'q02', title:'Grade Calculator (A/B/C/D/F)', p:'fire',
+        hint:`if marks >= 90   →  Grade A\nelse if >= 80    →  Grade B\nelse if >= 70    →  Grade C\nelse if >= 60    →  Grade D\nelse             →  Grade F\n\nThis is called an if-else LADDER.`,
+        sol:`#include<stdio.h>\nint main() {\n    int marks;\n    printf("Enter marks (0-100): ");\n    scanf("%d", &marks);\n\n    if(marks >= 90)       printf("Grade: A");\n    else if(marks >= 80)  printf("Grade: B");\n    else if(marks >= 70)  printf("Grade: C");\n    else if(marks >= 60)  printf("Grade: D");\n    else                  printf("Grade: F");\n\n    return 0;\n}`},
+      { id:'q03', title:'Simple Calculator (switch)', p:'fire',
+        hint:`switch(operator) {\n  case '+': do addition; break;\n  case '-': do subtraction; break;\n  case '*': do multiplication; break;\n  case '/': check b!=0, then divide; break;\n  default:  print "Invalid operator";\n}\n\nNote: Read operator as char, not int.`,
+        sol:`#include<stdio.h>\nint main() {\n    float a, b;\n    char op;\n    printf("Enter: num op num (e.g. 5 + 3): ");\n    scanf("%f %c %f", &a, &op, &b);\n\n    switch(op) {\n        case '+': printf("= %.2f", a+b); break;\n        case '-': printf("= %.2f", a-b); break;\n        case '*': printf("= %.2f", a*b); break;\n        case '/':\n            if(b != 0) printf("= %.2f", a/b);\n            else printf("Error: division by zero");\n            break;\n        default: printf("Invalid operator");\n    }\n    return 0;\n}`},
+      { id:'q04', title:'Even/Odd + Positive/Negative', p:'high',
+        hint:`Two separate checks:\n1. Even/Odd:  if(n % 2 == 0)\n2. Sign:      if(n > 0) positive\n              else if(n < 0) negative\n              else zero`,
+        sol:`#include<stdio.h>\nint main() {\n    int n;\n    printf("Enter a number: ");\n    scanf("%d", &n);\n\n    if(n % 2 == 0) printf("%d is Even\\n", n);\n    else           printf("%d is Odd\\n", n);\n\n    if(n > 0)      printf("Positive");\n    else if(n < 0) printf("Negative");\n    else           printf("Zero");\n\n    return 0;\n}`},
+      { id:'q05', title:'Leap Year Check', p:'high',
+        hint:`Leap year condition:\n(year % 4 == 0 && year % 100 != 0)\n        OR\n(year % 400 == 0)\n\nExamples:\n2000 → Leap (400 rule)\n1900 → NOT Leap (100 rule)\n2024 → Leap`,
+        sol:`#include<stdio.h>\nint main() {\n    int year;\n    printf("Enter year: ");\n    scanf("%d", &year);\n\n    if((year%4==0 && year%100!=0) || year%400==0)\n        printf("%d is a Leap Year", year);\n    else\n        printf("%d is NOT a Leap Year", year);\n\n    return 0;\n}`},
+      { id:'q06', title:'Vowel or Consonant (switch)', p:'medium',
+        hint:`switch(ch) {\n  case 'a': case 'e': case 'i':\n  case 'o': case 'u':\n  case 'A': case 'E': case 'I':\n  case 'O': case 'U':\n      print "Vowel"; break;\n  default:\n      print "Consonant";\n}`,
+        sol:`#include<stdio.h>\nint main() {\n    char ch;\n    printf("Enter a character: ");\n    scanf(" %c", &ch);\n\n    switch(ch) {\n        case 'a': case 'e': case 'i': case 'o': case 'u':\n        case 'A': case 'E': case 'I': case 'O': case 'U':\n            printf("Vowel"); break;\n        default:\n            printf("Consonant");\n    }\n    return 0;\n}`},
+    ]
+  },
+  {
+    id: 'loops', icon: '🔁', name: 'Loops & Patterns',
+    desc: 'Module III — for, while, do-while, nested loops',
+    qs: [
+      { id:'q07', title:'Star Pyramid (Nested Loop)', p:'fire',
+        hint:`For n=4 rows:\nRow 1: 3 spaces, 1 star\nRow 2: 2 spaces, 3 stars\nRow 3: 1 space,  5 stars\nRow 4: 0 spaces, 7 stars\n\nOuter loop: i = 1 to n\nSpaces: print (n-i) spaces\nStars:  print (2*i-1) stars`,
+        sol:`#include<stdio.h>\nint main() {\n    int n, i, j;\n    printf("Enter rows: ");\n    scanf("%d", &n);\n\n    for(i = 1; i <= n; i++) {\n        for(j = i; j < n; j++)\n            printf(" ");\n        for(j = 1; j <= 2*i-1; j++)\n            printf("*");\n        printf("\\n");\n    }\n    return 0;\n}`},
+      { id:'q08', title:'Prime Number Check', p:'fire',
+        hint:`Loop from i=2 to n/2:\n  if(n % i == 0)  →  not prime, break\n\nIf loop ends without break  →  prime\n\nEdge cases:\n  n=1  →  NOT prime\n  n=2  →  prime`,
+        sol:`#include<stdio.h>\nint main() {\n    int n, i, isPrime = 1;\n    printf("Enter a number: ");\n    scanf("%d", &n);\n\n    if(n <= 1) isPrime = 0;\n\n    for(i = 2; i <= n/2; i++) {\n        if(n % i == 0) {\n            isPrime = 0;\n            break;\n        }\n    }\n\n    if(isPrime) printf("%d is Prime", n);\n    else        printf("%d is NOT Prime", n);\n\n    return 0;\n}`},
+      { id:'q09', title:'Fibonacci Series (Loop)', p:'fire',
+        hint:`Start: a=0, b=1\nEach step:\n  print a\n  next = a + b\n  a = b\n  b = next\n\nFirst 7 terms: 0 1 1 2 3 5 8`,
+        sol:`#include<stdio.h>\nint main() {\n    int n, a=0, b=1, next, i;\n    printf("Enter N: ");\n    scanf("%d", &n);\n\n    printf("Fibonacci: ");\n    for(i = 0; i < n; i++) {\n        printf("%d ", a);\n        next = a + b;\n        a = b;\n        b = next;\n    }\n    return 0;\n}`},
+      { id:'q10', title:'Armstrong Number', p:'high',
+        hint:`Armstrong: sum of each digit^(no. of digits) = number\n153 = 1^3 + 5^3 + 3^3 = 1+125+27 = 153 ✓\n\nSteps:\n1. Count digits\n2. Extract each digit with %10\n3. Add digit^count to sum\n4. if(sum == original) → Armstrong`,
+        sol:`#include<stdio.h>\n#include<math.h>\nint main() {\n    int n, temp, sum=0, rem, digits=0;\n    printf("Enter number: ");\n    scanf("%d", &n);\n\n    temp = n;\n    while(temp != 0) { digits++; temp /= 10; }\n\n    temp = n;\n    while(temp != 0) {\n        rem = temp % 10;\n        sum += (int)pow(rem, digits);\n        temp /= 10;\n    }\n\n    if(sum == n) printf("%d is Armstrong", n);\n    else         printf("%d is NOT Armstrong", n);\n    return 0;\n}`},
+      { id:'q11', title:'Reverse a Number', p:'high',
+        hint:`While n != 0:\n  rem = n % 10      (last digit)\n  rev = rev*10 + rem (add to reversed)\n  n = n / 10        (remove last digit)\n\nExample: n=1234\n→ rem=4, rev=4,   n=123\n→ rem=3, rev=43,  n=12\n→ rem=2, rev=432, n=1\n→ rem=1, rev=4321, n=0`,
+        sol:`#include<stdio.h>\nint main() {\n    int n, rev=0, rem;\n    printf("Enter number: ");\n    scanf("%d", &n);\n\n    while(n != 0) {\n        rem = n % 10;\n        rev = rev * 10 + rem;\n        n /= 10;\n    }\n    printf("Reversed = %d", rev);\n    return 0;\n}`},
+    ]
+  },
+  {
+    id: 'arrays', icon: '📦', name: 'Arrays & Strings',
+    desc: 'Module III — Arrays, 2D arrays, string handling',
+    qs: [
+      { id:'q12', title:'Bubble Sort (Ascending)', p:'fire',
+        hint:`Two nested loops:\nOuter: n-1 passes\nInner: compare adjacent elements\n  if arr[j] > arr[j+1]  →  swap\n\nAfter each outer pass, largest element\nbubbles to the end.\n\nFor DESCENDING: change > to <`,
+        sol:`#include<stdio.h>\nint main() {\n    int arr[100], n, i, j, temp;\n    printf("Enter size: "); scanf("%d", &n);\n    for(i = 0; i < n; i++) scanf("%d", &arr[i]);\n\n    for(i = 0; i < n-1; i++) {\n        for(j = 0; j < n-i-1; j++) {\n            if(arr[j] > arr[j+1]) {\n                temp    = arr[j];\n                arr[j]  = arr[j+1];\n                arr[j+1]= temp;\n            }\n        }\n    }\n\n    printf("Sorted: ");\n    for(i = 0; i < n; i++) printf("%d ", arr[i]);\n    return 0;\n}`},
+      { id:'q13', title:'Find Largest & Smallest', p:'fire',
+        hint:`Set max = arr[0] and min = arr[0]\nThen loop from i=1 to n-1:\n  if arr[i] > max  →  max = arr[i]\n  if arr[i] < min  →  min = arr[i]`,
+        sol:`#include<stdio.h>\nint main() {\n    int arr[100], n, i, max, min;\n    printf("Enter size: "); scanf("%d", &n);\n    for(i = 0; i < n; i++) scanf("%d", &arr[i]);\n\n    max = min = arr[0];\n    for(i = 1; i < n; i++) {\n        if(arr[i] > max) max = arr[i];\n        if(arr[i] < min) min = arr[i];\n    }\n    printf("Max = %d\\nMin = %d", max, min);\n    return 0;\n}`},
+      { id:'q14', title:'Palindrome String (no strrev)', p:'fire',
+        hint:`Compare str[i] with str[len-1-i]\nLoop i from 0 to len/2\nIf any mismatch → not palindrome\n\nExample: "madam"\nstr[0]='m', str[4]='m' ✓\nstr[1]='a', str[3]='a' ✓\nstr[2]='d'  ← middle, skip`,
+        sol:`#include<stdio.h>\n#include<string.h>\nint main() {\n    char str[100];\n    int i, len, flag = 1;\n    printf("Enter string: ");\n    scanf("%s", str);\n    len = strlen(str);\n\n    for(i = 0; i < len/2; i++) {\n        if(str[i] != str[len-1-i]) {\n            flag = 0;\n            break;\n        }\n    }\n\n    if(flag) printf("Palindrome");\n    else     printf("Not Palindrome");\n    return 0;\n}`},
+      { id:'q15', title:'Reverse an Array', p:'high',
+        hint:`Two-pointer approach:\nleft = 0, right = n-1\nWhile left < right:\n  swap arr[left] and arr[right]\n  left++, right--`,
+        sol:`#include<stdio.h>\nint main() {\n    int arr[100], n, i, temp;\n    printf("Enter size: "); scanf("%d", &n);\n    for(i = 0; i < n; i++) scanf("%d", &arr[i]);\n\n    for(i = 0; i < n/2; i++) {\n        temp         = arr[i];\n        arr[i]       = arr[n-1-i];\n        arr[n-1-i]   = temp;\n    }\n\n    printf("Reversed: ");\n    for(i = 0; i < n; i++) printf("%d ", arr[i]);\n    return 0;\n}`},
+      { id:'q16', title:'Count Vowels & Consonants', p:'high',
+        hint:`Loop through each character of string:\nif ch == a,e,i,o,u (or uppercase) → vowels++\nelse if ch is a letter → consonants++\n\nCheck both lowercase AND uppercase cases.`,
+        sol:`#include<stdio.h>\n#include<string.h>\nint main() {\n    char str[200];\n    int i, v=0, c=0;\n    printf("Enter string: ");\n    scanf("%s", str);\n\n    for(i = 0; str[i] != '\\0'; i++) {\n        char ch = str[i];\n        if(ch=='a'||ch=='e'||ch=='i'||ch=='o'||ch=='u'||\n           ch=='A'||ch=='E'||ch=='I'||ch=='O'||ch=='U')\n            v++;\n        else if((ch>='a'&&ch<='z')||(ch>='A'&&ch<='Z'))\n            c++;\n    }\n    printf("Vowels = %d\\nConsonants = %d", v, c);\n    return 0;\n}`},
+    ]
+  },
+  {
+    id: 'functions', icon: '⚙️', name: 'Functions & Recursion',
+    desc: 'Module IV — Functions, call by value/ref, recursion',
+    qs: [
+      { id:'q17', title:'Factorial using Recursion', p:'fire',
+        hint:`Base case:    if(n == 0 || n == 1)  return 1;\nRecursive:    return n * factorial(n-1);\n\nTrace for factorial(4):\n4 * factorial(3)\n4 * 3 * factorial(2)\n4 * 3 * 2 * factorial(1)\n4 * 3 * 2 * 1  =  24`,
+        sol:`#include<stdio.h>\n\nint factorial(int n) {\n    if(n == 0 || n == 1) return 1;\n    return n * factorial(n - 1);\n}\n\nint main() {\n    int n;\n    printf("Enter n: ");\n    scanf("%d", &n);\n    printf("%d! = %d", n, factorial(n));\n    return 0;\n}`},
+      { id:'q18', title:'Fibonacci using Recursion', p:'fire',
+        hint:`Base cases:\n  if(n == 0) return 0;\n  if(n == 1) return 1;\nRecursive:\n  return fib(n-1) + fib(n-2);\n\nfib(5) = fib(4)+fib(3) = 3+2 = 5`,
+        sol:`#include<stdio.h>\n\nint fib(int n) {\n    if(n == 0) return 0;\n    if(n == 1) return 1;\n    return fib(n-1) + fib(n-2);\n}\n\nint main() {\n    int n, i;\n    printf("Enter N: ");\n    scanf("%d", &n);\n    printf("Fibonacci: ");\n    for(i = 0; i < n; i++)\n        printf("%d ", fib(i));\n    return 0;\n}`},
+      { id:'q19', title:'Swap: Call by Value vs Reference', p:'fire',
+        hint:`CALL BY VALUE:\nvoid swap(int a, int b)  ← copies made\nOriginal variables UNCHANGED\n\nCALL BY REFERENCE (Pointer):\nvoid swap(int *a, int *b)\n*a and *b access originals directly\nCall with: swap(&x, &y)\n\nKey: & gives address, * dereferences`,
+        sol:`#include<stdio.h>\n\nvoid swapValue(int a, int b) {\n    int t = a; a = b; b = t;\n    printf("Inside (value): a=%d b=%d\\n", a, b);\n}\n\nvoid swapRef(int *a, int *b) {\n    int t = *a; *a = *b; *b = t;\n}\n\nint main() {\n    int x = 10, y = 20;\n\n    swapValue(x, y);\n    printf("After value swap: x=%d y=%d\\n", x, y);\n\n    swapRef(&x, &y);\n    printf("After ref swap:   x=%d y=%d\\n", x, y);\n\n    return 0;\n}`},
+      { id:'q20', title:'GCD using Recursion (Euclidean)', p:'high',
+        hint:`Euclidean Algorithm:\nBase:      if(b == 0) return a;\nRecursive: return gcd(b, a % b);\n\nTrace: gcd(48, 18)\n→ gcd(18, 48%18) = gcd(18, 12)\n→ gcd(12, 18%12) = gcd(12, 6)\n→ gcd(6,  12%6)  = gcd(6, 0)\n→ return 6`,
+        sol:`#include<stdio.h>\n\nint gcd(int a, int b) {\n    if(b == 0) return a;\n    return gcd(b, a % b);\n}\n\nint main() {\n    int a, b;\n    printf("Enter two numbers: ");\n    scanf("%d %d", &a, &b);\n    printf("GCD = %d", gcd(a, b));\n    return 0;\n}`},
+    ]
+  },
+  {
+    id: 'structures', icon: '🗂️', name: 'Structures & Pointers',
+    desc: 'Module V — struct, array of structs, pointers',
+    qs: [
+      { id:'q21', title:'Student Record — Input & Display', p:'fire',
+        hint:`struct Student {\n    int roll;\n    char name[50];\n    float marks;\n};\n\nAccess with DOT operator:\n  s.roll = 101;\n  s.marks = 89.5;\n\nDeclare: struct Student s;`,
+        sol:`#include<stdio.h>\n\nstruct Student {\n    int roll;\n    char name[50];\n    float marks;\n};\n\nint main() {\n    struct Student s;\n\n    printf("Enter roll number: "); scanf("%d",  &s.roll);\n    printf("Enter name: ");        scanf("%s",   s.name);\n    printf("Enter marks: ");       scanf("%f",  &s.marks);\n\n    printf("\\n--- Student Record ---\\n");\n    printf("Roll  : %d\\n", s.roll);\n    printf("Name  : %s\\n", s.name);\n    printf("Marks : %.2f\\n", s.marks);\n\n    return 0;\n}`},
+      { id:'q22', title:'Array of Structs — Find Topper', p:'fire',
+        hint:`struct Student s[5];\n\nStep 1: for loop → input all 5 students\nStep 2: for loop → find index of max marks\n  Keep track of maxIdx\n  if s[i].marks > s[maxIdx].marks → maxIdx = i\nStep 3: Print s[maxIdx]`,
+        sol:`#include<stdio.h>\n\nstruct Student {\n    int roll;\n    char name[50];\n    float marks;\n};\n\nint main() {\n    struct Student s[5];\n    int i, maxIdx = 0;\n\n    for(i = 0; i < 5; i++) {\n        printf("Student %d:\\n", i+1);\n        printf("  Roll: ");  scanf("%d", &s[i].roll);\n        printf("  Name: ");  scanf("%s",  s[i].name);\n        printf("  Marks: "); scanf("%f", &s[i].marks);\n    }\n\n    for(i = 1; i < 5; i++)\n        if(s[i].marks > s[maxIdx].marks)\n            maxIdx = i;\n\n    printf("\\nTopper: %s with %.2f marks", s[maxIdx].name, s[maxIdx].marks);\n    return 0;\n}`},
+      { id:'q23', title:'Swap Two Numbers using Pointers', p:'high',
+        hint:`Pointer basics:\n  int *p = &x;   // p stores address of x\n  *p = 20;       // changes x to 20\n\nSwap:\n  void swap(int *a, int *b) {\n    int t = *a;\n    *a = *b;\n    *b = t;\n  }\nCall: swap(&x, &y);`,
+        sol:`#include<stdio.h>\n\nvoid swap(int *a, int *b) {\n    int temp = *a;\n    *a = *b;\n    *b = temp;\n}\n\nint main() {\n    int x, y;\n    printf("Enter two numbers: ");\n    scanf("%d %d", &x, &y);\n\n    printf("Before: x=%d y=%d\\n", x, y);\n    swap(&x, &y);\n    printf("After:  x=%d y=%d\\n", x, y);\n\n    return 0;\n}`},
+    ]
+  }
+];
+
+// State
+const solved = new Set(JSON.parse(localStorage.getItem('pps_lab_v2') || '[]'));
+let activeTopicId = data[0].id;
+
+function save() {
+  localStorage.setItem('pps_lab_v2', JSON.stringify([...solved]));
+}
+
+function totalQ() { return data.reduce((a, t) => a + t.qs.length, 0); }
+
+function updateHeader() {
+  document.getElementById('prog-text').textContent = `${solved.size} / ${totalQ()}`;
+}
+
+function pLabel(p) {
+  if(p==='fire') return `<span class="priority-label pl-fire">🔥 must do</span>`;
+  if(p==='high') return `<span class="priority-label pl-high">⭐ high</span>`;
+  return `<span class="priority-label pl-med">◦ possible</span>`;
+}
+
+function renderSidebar() {
+  const el = document.getElementById('sidebar');
+  el.innerHTML = `<div class="sidebar-section">Topics</div>` +
+    data.map(t => {
+      const cnt = t.qs.filter(q => solved.has(q.id)).length;
+      const done = cnt === t.qs.length && cnt > 0;
+      return `<div class="sidebar-topic${t.id===activeTopicId?' active':''}" onclick="switchTopic('${t.id}')">
+        <div class="topic-name-wrap">
+          <span class="topic-icon">${t.icon}</span>
+          <span class="topic-name">${t.name}</span>
+        </div>
+        <span class="topic-badge${done?' done':''}">${cnt}/${t.qs.length}</span>
+      </div>`;
+    }).join('');
+}
+
+function renderMain() {
+  const topic = data.find(t => t.id === activeTopicId);
+  const el = document.getElementById('main-content');
+
+  el.innerHTML = `
+    <div class="topic-header">
+      <h2>${topic.icon} ${topic.name}</h2>
+      <div class="topic-desc">${topic.desc}</div>
+    </div>
+    <div class="legend">
+      <div class="leg"><div class="leg-dot" style="background:var(--fire)"></div> Almost certain</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--amber)"></div> High chance</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--accent)"></div> Possible</div>
+    </div>
+    <div class="q-list">
+      ${topic.qs.map((q, i) => renderQRow(q, i+1)).join('')}
+    </div>`;
+}
+
+function renderQRow(q, num) {
+  const isSolved = solved.has(q.id);
+  return `
+  <div class="q-row${isSolved?' solved':''}" id="row-${q.id}">
+    <div class="q-row-top" onclick="toggleQ('${q.id}')">
+      <span class="q-num">${String(num).padStart(2,'0')}</span>
+      <div class="priority-dot ${q.p}-dot"></div>
+      <span class="q-row-title">${q.title}</span>
+      ${pLabel(q.p)}
+      <span class="solved-mark">✓ solved</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="q-expand" id="exp-${q.id}">
+      <div class="expand-tabs">
+        <button class="etab active" onclick="switchTab('${q.id}','attempt',this)">Attempt</button>
+        <button class="etab" onclick="switchTab('${q.id}','hint',this)">Hint</button>
+        <button class="etab" onclick="switchTab('${q.id}','solution',this)">Solution</button>
+      </div>
+
+      <div class="tab-content active" id="tab-attempt-${q.id}">
+        <div class="code-wrap">
+          <div class="file-bar">
+            <div class="file-dots">
+              <div class="fdot" style="background:#e05c5c"></div>
+              <div class="fdot" style="background:#e8a045"></div>
+              <div class="fdot" style="background:#3eb489"></div>
+            </div>
+            &nbsp; solution.c
+          </div>
+          <textarea class="editor" id="ed-${q.id}" placeholder="#include<stdio.h>&#10;&#10;int main() {&#10;    // write your solution here&#10;&#10;    return 0;&#10;}" spellcheck="false"></textarea>
+        </div>
+        <div class="action-row">
+          <button class="btn btn-solve" onclick="markSolved('${q.id}')">${isSolved ? '↩ Mark Unsolved' : '✓ Mark as Solved'}</button>
+          ${isSolved ? `<button class="btn btn-unsolved" onclick="markUnsolved('${q.id}')">Mark Unsolved</button>` : ''}
+        </div>
+      </div>
+
+      <div class="tab-content" id="tab-hint-${q.id}">
+        <div class="file-bar"><div class="file-dots"><div class="fdot" style="background:#e05c5c"></div><div class="fdot" style="background:#e8a045"></div><div class="fdot" style="background:#3eb489"></div></div>&nbsp; hint.txt</div>
+        <div class="hint-text">${q.hint}</div>
+      </div>
+
+      <div class="tab-content" id="tab-solution-${q.id}">
+        <div class="file-bar"><div class="file-dots"><div class="fdot" style="background:#e05c5c"></div><div class="fdot" style="background:#e8a045"></div><div class="fdot" style="background:#3eb489"></div></div>&nbsp; answer.c</div>
+        <pre class="code-block">${q.sol.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+      </div>
+    </div>
+  </div>`;
+}
+
+function switchTopic(id) {
+  activeTopicId = id;
+  renderSidebar();
+  renderMain();
+}
+
+function toggleQ(id) {
+  const row = document.getElementById('row-' + id);
+  row.classList.toggle('open');
+}
+
+function switchTab(qid, tab, btn) {
+  ['attempt','hint','solution'].forEach(t => {
+    document.getElementById(`tab-${t}-${qid}`).classList.toggle('active', t===tab);
+  });
+  btn.closest('.expand-tabs').querySelectorAll('.etab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function markSolved(id) {
+  solved.add(id);
+  save();
+  renderSidebar();
+  renderMain();
+  updateHeader();
+  // re-open the row
+  setTimeout(() => {
+    const row = document.getElementById('row-' + id);
+    if(row) row.classList.add('open');
+  }, 50);
+}
+
+function markUnsolved(id) {
+  solved.delete(id);
+  save();
+  renderSidebar();
+  renderMain();
+  updateHeader();
+}
+
+// Tab key in editors
+document.addEventListener('keydown', e => {
+  if(e.key === 'Tab' && e.target.classList.contains('editor')) {
+    e.preventDefault();
+    const s = e.target.selectionStart;
+    e.target.value = e.target.value.substring(0,s) + '    ' + e.target.value.substring(e.target.selectionEnd);
+    e.target.selectionStart = e.target.selectionEnd = s + 4;
+  }
+});
+
+// Init
+renderSidebar();
+renderMain();
+updateHeader();
+</script>
+</body>
+</html>

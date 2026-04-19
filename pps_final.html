@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPS Study Lab — BIT Mesra</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#111111;
+  --s1:#1a1a1a;
+  --s2:#222222;
+  --s3:#2a2a2a;
+  --b1:#333333;
+  --b2:#444444;
+  --tx:#dddddd;
+  --t2:#999999;
+  --t3:#555555;
+  --ac:#5b8dee;
+  --gr:#3dba7e;
+  --am:#e8a030;
+  --re:#e05555;
+  --or:#e07030;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',sans-serif;
+}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px;line-height:1.6}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:3px}
+
+/* SHELL */
+.shell{display:flex;height:100vh;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:210px;background:var(--s1);border-right:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sb-logo{padding:16px 14px 12px;border-bottom:1px solid var(--b1)}
+.sb-logo-name{font-size:14px;font-weight:600;color:var(--tx)}
+.sb-logo-sub{font-size:11px;color:var(--t2);font-family:var(--mono);margin-top:2px}
+.sb-prog{padding:10px 14px;border-bottom:1px solid var(--b1)}
+.sb-prog-row{display:flex;justify-content:space-between;font-size:11px;color:var(--t2);margin-bottom:5px}
+.sb-prog-bar{height:3px;background:var(--s3);border-radius:2px}
+.sb-prog-fill{height:100%;background:var(--ac);border-radius:2px;transition:width 0.3s}
+.sb-sec{padding:12px 14px 3px;font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.1em}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:var(--t2);border-left:2px solid transparent;transition:all 0.12s}
+.sb-item:hover{background:var(--s2);color:var(--tx)}
+.sb-item.active{background:var(--s2);color:var(--tx);border-left-color:var(--ac)}
+.sb-item .si-ic{font-size:13px;width:16px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--t3);background:var(--s3);padding:1px 5px;border-radius:3px}
+.sb-badge.done{color:var(--gr)}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.page{display:none;flex:1;flex-direction:column}
+.page.active{display:flex}
+
+/* PAGE TOP */
+.ptop{padding:24px 28px 18px;border-bottom:1px solid var(--b1);flex-shrink:0}
+.ptop-eye{font-size:11px;color:var(--ac);font-family:var(--mono);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em}
+.ptop-title{font-size:22px;font-weight:600;letter-spacing:-0.3px}
+.ptop-sub{font-size:13px;color:var(--t2);margin-top:3px}
+
+/* BODY */
+.pbody{padding:24px 28px;flex:1}
+
+/* BLOCKS */
+.block{margin-bottom:24px}
+.block-title{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:6px}
+
+/* CODE */
+.code{background:#0d0d0d;border:1px solid var(--b1);border-radius:6px;padding:14px 16px;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:#9cdcfe;overflow-x:auto;margin:10px 0;white-space:pre}
+.kw{color:#569cd6}.fn{color:#dcdcaa}.st{color:#ce9178}.cm{color:#6a9955}.nm{color:#b5cea8}.pp{color:#c586c0}.tp{color:#4ec9b0}
+
+.ic{font-family:var(--mono);font-size:12px;background:#0d0d0d;border:1px solid var(--b1);padding:1px 6px;border-radius:3px;color:#9cdcfe}
+
+/* NOTES */
+.note{border-left:2px solid var(--ac);background:rgba(91,141,238,0.06);padding:10px 14px;border-radius:0 5px 5px 0;font-size:13px;color:#aab8ee;margin:10px 0}
+.note.warn{border-color:var(--am);background:rgba(232,160,48,0.06);color:#d4aa6a}
+.note.good{border-color:var(--gr);background:rgba(61,186,126,0.06);color:#7ecba0}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+.tbl th{background:var(--s2);padding:9px 12px;text-align:left;font-weight:600;border:1px solid var(--b1)}
+.tbl td{padding:8px 12px;border:1px solid var(--b1);color:#c0c0c0}
+.tbl tr:hover td{background:var(--s2)}
+
+/* GRID 2 */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.gc{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:12px 14px}
+.gc-label{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px}
+.gc-val{font-family:var(--mono);font-size:12px;color:#9cdcfe}
+.gc-desc{font-size:12px;color:var(--t2);margin-top:3px}
+
+/* PROBLEMS */
+.prob{background:var(--s1);border:1px solid var(--b1);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.prob:hover{border-color:var(--b2)}
+.prob.solved{border-color:rgba(61,186,126,0.25)}
+.prob-top{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.prob-n{font-family:var(--mono);font-size:11px;color:var(--t3);width:20px;flex-shrink:0}
+.prob-ttl{flex:1;font-size:13px;font-weight:500}
+.prob-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;font-family:var(--mono)}
+.tag-f{background:rgba(224,112,48,0.15);color:var(--or)}
+.tag-h{background:rgba(232,160,48,0.15);color:var(--am)}
+.tag-m{background:rgba(91,141,238,0.15);color:var(--ac)}
+.prob-sv{font-size:11px;color:var(--gr);display:none}
+.prob.solved .prob-sv{display:block}
+.prob-ch{color:var(--t3);font-size:10px;transition:transform 0.2s}
+.prob.open .prob-ch{transform:rotate(90deg)}
+.prob-body{display:none;border-top:1px solid var(--b1);padding:12px 14px}
+.prob.open .prob-body{display:block}
+.ptabs{display:flex;gap:4px;margin-bottom:10px}
+.ptab{padding:4px 12px;border-radius:4px;border:1px solid var(--b1);background:transparent;color:var(--t2);font-size:12px;font-family:var(--sans);cursor:pointer;transition:all 0.12s}
+.ptab:hover{color:var(--tx)}
+.ptab.active{background:var(--s3);color:var(--tx);border-color:var(--b2)}
+.ptc{display:none}
+.ptc.active{display:block}
+.phint{background:#0d0d0d;border:1px solid var(--b1);border-radius:6px;padding:12px 14px;font-family:var(--mono);font-size:12px;line-height:1.8;color:#b0b8c8;white-space:pre-wrap;margin-bottom:10px}
+.psol{background:#0d0d0d;border:1px solid var(--b1);border-radius:6px;padding:12px 14px;font-family:var(--mono);font-size:12px;line-height:1.7;color:#9cdcfe;white-space:pre;overflow-x:auto;margin-bottom:10px}
+.pbtn{padding:6px 14px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:var(--gr);color:#0a1f14;font-family:var(--sans)}
+.pbtn:hover{background:#35a870}
+.pbtn2{padding:6px 14px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--b2);background:transparent;color:var(--t2);font-family:var(--sans);margin-left:6px}
+.pbtn2:hover{color:var(--tx)}
+
+/* VIVA */
+.vcard{background:var(--s1);border:1px solid var(--b1);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.vcard-q{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;cursor:pointer}
+.vcard-n{font-family:var(--mono);font-size:11px;color:var(--t3);width:20px;flex-shrink:0;padding-top:1px}
+.vcard-txt{flex:1;font-size:13px;font-weight:500;line-height:1.4}
+.vd{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;white-space:nowrap}
+.vd-e{background:rgba(61,186,126,0.15);color:var(--gr)}
+.vd-m{background:rgba(232,160,48,0.15);color:var(--am)}
+.vd-h{background:rgba(224,85,85,0.15);color:var(--re)}
+.vcard-ans{display:none;border-top:1px solid var(--b1);padding:12px 14px}
+.vcard.open .vcard-ans{display:block}
+.vans-txt{font-size:13px;color:#b0b8c8;line-height:1.8;white-space:pre-wrap}
+
+/* PLAN */
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.plan-day{background:var(--s1);border:1px solid var(--b1);border-radius:8px;overflow:hidden}
+.plan-dh{padding:12px 16px;font-size:14px;font-weight:600;border-bottom:1px solid var(--b1)}
+.shift{padding:11px 16px;border-bottom:1px solid var(--b1)}
+.shift:last-child{border-bottom:none}
+.shift-time{font-family:var(--mono);font-size:11px;color:var(--t2);margin-bottom:2px}
+.shift-label{font-size:13px;font-weight:500}
+.shift-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.shift-tag{font-size:11px;padding:2px 7px;border-radius:3px;background:var(--s3);color:var(--t2);border:1px solid var(--b1)}
+.shift-break{background:var(--s1);color:var(--gr);border-color:rgba(61,186,126,0.2)}
+
+/* COMPILER */
+.compiler-wrap{display:flex;flex-direction:column;height:calc(100vh - 90px);gap:0}
+.comp-toolbar{background:var(--s2);border-bottom:1px solid var(--b1);padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.comp-label{font-size:11px;color:var(--t2);font-family:var(--mono)}
+.lang-pill{background:#0e639c;color:#fff;padding:2px 9px;border-radius:3px;font-size:11px;font-family:var(--mono)}
+.run-btn{padding:5px 16px;border-radius:4px;border:none;background:var(--gr);color:#0a1f14;font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background 0.15s}
+.run-btn:hover{background:#35a870}
+.run-btn:disabled{background:var(--s3);color:var(--t3);cursor:not-allowed}
+.run-btn .spin{display:none}
+.run-btn.loading .spin{display:inline}
+.run-btn.loading .run-txt{display:none}
+.clear-btn{padding:5px 12px;border-radius:4px;border:1px solid var(--b1);background:transparent;color:var(--t2);font-size:12px;font-family:var(--sans);cursor:pointer}
+.clear-btn:hover{color:var(--tx)}
+.stdin-label{font-size:11px;color:var(--t2);margin-left:auto}
+
+.editor-split{display:flex;flex:1;overflow:hidden;gap:0}
+.editor-pane{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--b1)}
+.editor-pane-title{padding:6px 14px;font-size:11px;color:var(--t2);font-family:var(--mono);background:var(--s2);border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:8px}
+.editor-dots{display:flex;gap:5px}
+.edot{width:9px;height:9px;border-radius:50%}
+.editor-main{display:flex;flex:1;overflow:hidden}
+.line-nums{width:44px;background:#0d0d0d;padding:12px 10px 12px 0;text-align:right;font-family:var(--mono);font-size:12.5px;line-height:1.75;color:var(--t3);user-select:none;overflow:hidden;flex-shrink:0;padding-right:8px}
+.editor-inner{flex:1;position:relative;overflow:hidden}
+.code-hl{position:absolute;inset:0;font-family:var(--mono);font-size:12.5px;line-height:1.75;padding:12px 14px;pointer-events:none;white-space:pre;overflow:hidden;color:var(--tx);z-index:1}
+textarea.editor{position:absolute;inset:0;width:100%;height:100%;background:#0d0d0d;color:transparent;caret-color:#aeafad;font-family:var(--mono);font-size:12.5px;line-height:1.75;padding:12px 14px;border:none;outline:none;resize:none;tab-size:4;white-space:pre;overflow-x:auto;overflow-y:auto;z-index:2;spellcheck:false}
+
+.output-pane{width:380px;display:flex;flex-direction:column;flex-shrink:0}
+.output-pane-title{padding:6px 14px;font-size:11px;color:var(--t2);font-family:var(--mono);background:var(--s2);border-bottom:1px solid var(--b1)}
+.stdin-pane{height:100px;border-bottom:1px solid var(--b1);display:flex;flex-direction:column;flex-shrink:0}
+.stdin-pane-title{padding:4px 14px;font-size:11px;color:var(--t2);font-family:var(--mono);background:var(--s2);border-bottom:1px solid var(--b1)}
+textarea.stdin{flex:1;background:#0d0d0d;color:#c0c0c0;font-family:var(--mono);font-size:12px;padding:10px 14px;border:none;outline:none;resize:none;line-height:1.6}
+.output-body{flex:1;background:#0d0d0d;font-family:var(--mono);font-size:12.5px;line-height:1.75;padding:12px 14px;overflow-y:auto;white-space:pre-wrap;color:#c0c0c0}
+.output-body.error{color:var(--re)}
+.output-body.success{color:#9cdcfe}
+.out-placeholder{color:var(--t3)}
+
+/* AUTOCOMPLETE */
+.ac-drop{position:fixed;background:var(--s2);border:1px solid var(--b2);border-radius:5px;box-shadow:0 4px 16px rgba(0,0,0,0.6);z-index:9999;min-width:200px;max-height:180px;overflow-y:auto;display:none;font-family:var(--mono);font-size:12.5px}
+.ac-item{display:flex;align-items:center;gap:8px;padding:4px 10px;cursor:pointer}
+.ac-item:hover,.ac-item.sel{background:#094771}
+.ac-k{font-size:10px;font-weight:700;width:15px;height:15px;border-radius:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ak-kw{background:#569cd6;color:#111}.ak-fn{background:#dcdcaa;color:#111}.ak-sn{background:#c586c0;color:#111}.ak-hd{background:#ce9178;color:#111}
+.ac-lbl{color:#cccccc;flex:1}
+.ac-det{font-size:10px;color:var(--t3)}
+
+/* HOME */
+.home-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.hcard{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:16px;cursor:pointer;transition:all 0.15s}
+.hcard:hover{border-color:var(--b2);background:var(--s2)}
+.hcard-ic{font-size:22px;margin-bottom:8px}
+.hcard-ttl{font-size:13px;font-weight:600;margin-bottom:3px}
+.hcard-desc{font-size:12px;color:var(--t2)}
+.hcard-cnt{font-size:11px;font-family:var(--mono);color:var(--ac);margin-top:6px}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:14px;text-align:center}
+.stat-n{font-size:26px;font-weight:600;font-family:var(--mono)}
+.stat-l{font-size:11px;color:var(--t2);margin-top:2px}
+
+/* RULES */
+.rule{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:6px;margin-bottom:8px;font-size:13px;color:#b8b8b8;line-height:1.6}
+.rule strong{color:var(--tx)}
+
+@media(max-width:650px){
+  .sidebar{display:none}
+  .plan-grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .output-pane{display:none}
+  .pbody{padding:16px}
+  .ptop{padding:16px 16px 14px}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="nav">
+  <div class="sb-logo">
+    <div class="sb-logo-name">PPS Study Lab</div>
+    <div class="sb-logo-sub">BIT Mesra · End Sem</div>
+  </div>
+  <div class="sb-prog">
+    <div class="sb-prog-row"><span>Progress</span><span id="prog-txt" style="color:var(--ac)">0/33</span></div>
+    <div class="sb-prog-bar"><div class="sb-prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="sb-sec">Overview</div>
+  <div class="sb-item active" onclick="go('home',this)"><span class="si-ic">🏠</span>Dashboard</div>
+  <div class="sb-item" onclick="go('plan',this)"><span class="si-ic">📅</span>2-Day Plan</div>
+  <div class="sb-item" onclick="go('compiler',this)"><span class="si-ic">⚡</span>C Compiler</div>
+
+  <div class="sb-sec">Theory</div>
+  <div class="sb-item" onclick="go('t-ifelse',this)"><span class="si-ic">🔀</span>If-Else & Switch</div>
+  <div class="sb-item" onclick="go('t-loops',this)"><span class="si-ic">🔁</span>Loops & Patterns</div>
+  <div class="sb-item" onclick="go('t-arrays',this)"><span class="si-ic">📦</span>Arrays & Strings</div>
+  <div class="sb-item" onclick="go('t-func',this)"><span class="si-ic">⚙️</span>Functions & Recursion</div>
+  <div class="sb-item" onclick="go('t-struct',this)"><span class="si-ic">🗂️</span>Structures & Pointers</div>
+
+  <div class="sb-sec">Practice</div>
+  <div class="sb-item" onclick="go('p-ifelse',this)"><span class="si-ic">🔀</span>If-Else<span class="sb-badge" id="b-ifelse">0/7</span></div>
+  <div class="sb-item" onclick="go('p-loops',this)"><span class="si-ic">🔁</span>Loops<span class="sb-badge" id="b-loops">0/7</span></div>
+  <div class="sb-item" onclick="go('p-arrays',this)"><span class="si-ic">📦</span>Arrays<span class="sb-badge" id="b-arrays">0/7</span></div>
+  <div class="sb-item" onclick="go('p-func',this)"><span class="si-ic">⚙️</span>Functions<span class="sb-badge" id="b-func">0/6</span></div>
+  <div class="sb-item" onclick="go('p-struct',this)"><span class="si-ic">🗂️</span>Structures<span class="sb-badge" id="b-struct">0/6</span></div>
+
+  <div class="sb-sec">Viva</div>
+  <div class="sb-item" onclick="go('viva',this)"><span class="si-ic">🎤</span>Viva Questions</div>
+</nav>
+
+<div class="main">
+
+<!-- ══ HOME ══ -->
+<div class="page active" id="pg-home">
+  <div class="ptop"><div class="ptop-eye">Dashboard</div><div class="ptop-title">PPS Study Lab</div><div class="ptop-sub">End Sem Practical Exam · BIT Mesra Jaipur</div></div>
+  <div class="pbody">
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="s-sv" style="color:var(--ac)">0</div><div class="stat-l">Solved</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--or)">33</div><div class="stat-l">Problems</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--am)">30</div><div class="stat-l">Viva Qs</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--gr)">2</div><div class="stat-l">Days Left</div></div>
+    </div>
+    <div class="home-cards">
+      <div class="hcard" onclick="go('compiler',null)"><div class="hcard-ic">⚡</div><div class="hcard-ttl">C Compiler</div><div class="hcard-desc">Write & run C code in browser</div><div class="hcard-cnt">Piston API · GCC</div></div>
+      <div class="hcard" onclick="go('plan',null)"><div class="hcard-ic">📅</div><div class="hcard-ttl">2-Day Plan</div><div class="hcard-desc">Shift-wise study schedule</div><div class="hcard-cnt">Theory → Practice</div></div>
+      <div class="hcard" onclick="go('t-ifelse',null)"><div class="hcard-ic">📖</div><div class="hcard-ttl">Theory</div><div class="hcard-desc">Complete notes for all 5 topics</div><div class="hcard-cnt">5 modules covered</div></div>
+      <div class="hcard" onclick="go('p-ifelse',null)"><div class="hcard-ic">💻</div><div class="hcard-ttl">Practice</div><div class="hcard-desc">33 questions with hints & solutions</div><div class="hcard-cnt">🔥 Must Do first</div></div>
+      <div class="hcard" onclick="go('viva',null)"><div class="hcard-ic">🎤</div><div class="hcard-ttl">Viva Prep</div><div class="hcard-desc">30 most asked viva questions</div><div class="hcard-cnt">Easy → Hard</div></div>
+    </div>
+    <div class="block">
+      <div class="block-title">⚡ Start Here</div>
+      <div class="rule"><span>1</span><span>Read the <strong>2-Day Plan</strong> first to understand the schedule</span></div>
+      <div class="rule"><span>2</span><span>Day 1: Go topic by topic — read <strong>Theory</strong> then do its <strong>Practice problems</strong> immediately</span></div>
+      <div class="rule"><span>3</span><span>Day 2: Recode all 🔥 problems from scratch in the <strong>C Compiler</strong> — no copying</span></div>
+      <div class="rule"><span>4</span><span>Evening Day 2: Read all <strong>Viva Questions</strong> — revise definitions in your own words</span></div>
+      <div class="rule"><span>5</span><span>Night before exam: Sleep early — 8 hrs sleep = sharp mind in exam</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COMPILER ══ -->
+<div class="page" id="pg-compiler">
+  <div class="ptop"><div class="ptop-eye">C Compiler · Powered by Piston API</div><div class="ptop-title">⚡ C Compiler</div><div class="ptop-sub">Write C code, give input, click Run — output appears on right</div></div>
+  <div class="compiler-wrap">
+    <div class="comp-toolbar">
+      <span class="lang-pill">C · GCC</span>
+      <button class="run-btn" id="run-btn" onclick="runCode()">
+        <span class="run-txt">▶ Run</span>
+        <span class="spin">⟳ Running...</span>
+      </button>
+      <button class="clear-btn" onclick="clearEditor()">Clear</button>
+      <button class="clear-btn" onclick="loadTemplate()">Template</button>
+    </div>
+    <div class="editor-split">
+      <div class="editor-pane">
+        <div class="editor-pane-title">
+          <div class="editor-dots"><div class="edot" style="background:#ff5f57"></div><div class="edot" style="background:#febc2e"></div><div class="edot" style="background:#28c840"></div></div>
+          solution.c
+        </div>
+        <div class="editor-main">
+          <div class="line-nums" id="lnums">1</div>
+          <div class="editor-inner">
+            <div class="code-hl" id="codehl"></div>
+            <textarea class="editor" id="editor" spellcheck="false" autocomplete="off" placeholder="// Write your C code here..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="output-pane">
+        <div class="stdin-pane">
+          <div class="stdin-pane-title">stdin (input)</div>
+          <textarea class="stdin" id="stdin" placeholder="Enter program input here...&#10;(e.g. 5 for n, or 10 20 30 for array)"></textarea>
+        </div>
+        <div class="output-pane-title">stdout (output)</div>
+        <div class="output-body" id="output"><span class="out-placeholder">// Output will appear here after clicking Run</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 2-DAY PLAN ══ -->
+<div class="page" id="pg-plan">
+  <div class="ptop"><div class="ptop-eye">Schedule</div><div class="ptop-title">📅 2-Day Battle Plan</div><div class="ptop-sub">Stick to this and 90+ marks guaranteed</div></div>
+  <div class="pbody">
+    <div class="plan-grid">
+      <div class="plan-day">
+        <div class="plan-dh" style="color:#8ab4f8">📖 Day 1 — Theory + Problems</div>
+        <div class="shift"><div class="shift-time">6:00 AM – 8:00 AM</div><div class="shift-label">If-Else & Switch — Theory + 7 Problems</div><div class="shift-tags"><span class="shift-tag">if-else ladder</span><span class="shift-tag">switch</span><span class="shift-tag">nested if</span></div></div>
+        <div class="shift"><div class="shift-time">8:00 – 8:30 AM</div><div class="shift-label" style="color:var(--gr)">☕ Break + Breakfast</div><div class="shift-tags"><span class="shift-tag shift-break">rest</span></div></div>
+        <div class="shift"><div class="shift-time">8:30 AM – 11:00 AM</div><div class="shift-label">Loops & Patterns — Theory + 7 Problems</div><div class="shift-tags"><span class="shift-tag">for/while</span><span class="shift-tag">nested loops</span><span class="shift-tag">patterns</span></div></div>
+        <div class="shift"><div class="shift-time">11:00 AM – 12:00 PM</div><div class="shift-label" style="color:var(--gr)">🍽️ Lunch Break</div><div class="shift-tags"><span class="shift-tag shift-break">rest</span></div></div>
+        <div class="shift"><div class="shift-time">12:00 – 3:00 PM</div><div class="shift-label">Arrays & Strings — Theory + 7 Problems</div><div class="shift-tags"><span class="shift-tag">bubble sort</span><span class="shift-tag">strings</span><span class="shift-tag">palindrome</span></div></div>
+        <div class="shift"><div class="shift-time">3:00 – 4:00 PM</div><div class="shift-label" style="color:var(--gr)">😴 Power Nap</div><div class="shift-tags"><span class="shift-tag shift-break">recharge</span></div></div>
+        <div class="shift"><div class="shift-time">4:00 – 7:00 PM</div><div class="shift-label">Functions & Recursion — Theory + 6 Problems</div><div class="shift-tags"><span class="shift-tag">call by value/ref</span><span class="shift-tag">recursion</span></div></div>
+        <div class="shift"><div class="shift-time">7:00 – 9:30 PM</div><div class="shift-label">Structures & Pointers — Theory + 6 Problems</div><div class="shift-tags"><span class="shift-tag">struct</span><span class="shift-tag">typedef</span><span class="shift-tag">pointers</span></div></div>
+        <div class="shift"><div class="shift-time">9:30 PM onwards</div><div class="shift-label" style="color:var(--gr)">🌙 Rest — Theory done!</div></div>
+      </div>
+      <div class="plan-day">
+        <div class="plan-dh" style="color:#a08cf8">💻 Day 2 — Practice + Viva</div>
+        <div class="shift"><div class="shift-time">6:00 – 9:00 AM</div><div class="shift-label">Recode all 🔥 Must-Do problems from scratch</div><div class="shift-tags"><span class="shift-tag">no hints</span><span class="shift-tag">use compiler</span><span class="shift-tag">~14 programs</span></div></div>
+        <div class="shift"><div class="shift-time">9:00 – 9:30 AM</div><div class="shift-label" style="color:var(--gr)">☕ Break</div><div class="shift-tags"><span class="shift-tag shift-break">rest</span></div></div>
+        <div class="shift"><div class="shift-time">9:30 AM – 12:30 PM</div><div class="shift-label">Practice ⭐ High-chance problems + edge cases</div><div class="shift-tags"><span class="shift-tag">variations</span><span class="shift-tag">twists</span><span class="shift-tag">~12 programs</span></div></div>
+        <div class="shift"><div class="shift-time">12:30 – 1:30 PM</div><div class="shift-label" style="color:var(--gr)">🍽️ Lunch</div><div class="shift-tags"><span class="shift-tag shift-break">rest</span></div></div>
+        <div class="shift"><div class="shift-time">1:30 – 4:00 PM</div><div class="shift-label">Viva Prep — Read all 30 questions + answers</div><div class="shift-tags"><span class="shift-tag">definitions</span><span class="shift-tag">concepts</span><span class="shift-tag">tricky Qs</span></div></div>
+        <div class="shift"><div class="shift-time">4:00 – 5:00 PM</div><div class="shift-label" style="color:var(--gr)">😴 Break</div><div class="shift-tags"><span class="shift-tag shift-break">walk outside</span></div></div>
+        <div class="shift"><div class="shift-time">5:00 – 8:00 PM</div><div class="shift-label">Final revision — hardest 10 programs without looking</div><div class="shift-tags"><span class="shift-tag">bubble sort</span><span class="shift-tag">recursion</span><span class="shift-tag">struct array</span></div></div>
+        <div class="shift"><div class="shift-time">8:00 – 9:00 PM</div><div class="shift-label">Viva 2nd pass — key definitions only</div></div>
+        <div class="shift"><div class="shift-time">9:00 PM onwards</div><div class="shift-label" style="color:var(--gr)">🌙 Sleep! Exam tomorrow.</div><div class="shift-tags"><span class="shift-tag shift-break">8 hrs sleep = sharp mind</span></div></div>
+      </div>
+    </div>
+    <div class="block">
+      <div class="block-title">🏆 Exam Day Rules</div>
+      <div class="rule"><span>📝</span><span><strong>Paper first, keyboard second.</strong> Write 2-3 lines of logic on paper before coding. Examiner watches your process.</span></div>
+      <div class="rule"><span>💬</span><span><strong>First line = comment.</strong> <span class="ic">// Bubble Sort ascending</span> — tells examiner you know what you're doing.</span></div>
+      <div class="rule"><span>🔍</span><span><strong>Test edge cases mentally.</strong> n=0, negative, single element. Examiner loves these twists.</span></div>
+      <div class="rule"><span>🎤</span><span><strong>Viva: never say "I don't know."</strong> Say "I think it does X" — confidence + partial knowledge = marks.</span></div>
+      <div class="rule"><span>⏱️</span><span><strong>Working code beats perfect code.</strong> Partial working program = partial marks. Don't leave blank.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ THEORY PAGES ══ -->
+<div class="page" id="pg-t-ifelse">
+  <div class="ptop"><div class="ptop-eye">Theory · Module II</div><div class="ptop-title">🔀 If-Else & Switch</div><div class="ptop-sub">Conditional branching — making decisions in code</div></div>
+  <div class="pbody">
+    <div class="block"><div class="block-title">Basic if-else</div>
+      <div class="code"><span class="kw">if</span>(condition) {
+    <span class="cm">// runs if TRUE</span>
+} <span class="kw">else</span> {
+    <span class="cm">// runs if FALSE</span>
+}
+
+<span class="cm">// Example: even or odd</span>
+<span class="kw">if</span>(n % <span class="nm">2</span> == <span class="nm">0</span>) <span class="fn">printf</span>(<span class="st">"Even"</span>);
+<span class="kw">else</span>             <span class="fn">printf</span>(<span class="st">"Odd"</span>);</div>
+      <div class="note">Any non-zero value = true, 0 = false. Condition must be inside <span class="ic">()</span>.</div>
+    </div>
+    <div class="block"><div class="block-title">if-else Ladder (exam favourite)</div>
+      <div class="code"><span class="cm">// Grade calculator — check from HIGHEST to lowest</span>
+<span class="kw">if</span>(marks >= <span class="nm">90</span>)       <span class="fn">printf</span>(<span class="st">"A"</span>);
+<span class="kw">else if</span>(marks >= <span class="nm">80</span>)  <span class="fn">printf</span>(<span class="st">"B"</span>);
+<span class="kw">else if</span>(marks >= <span class="nm">70</span>)  <span class="fn">printf</span>(<span class="st">"C"</span>);
+<span class="kw">else if</span>(marks >= <span class="nm">60</span>)  <span class="fn">printf</span>(<span class="st">"D"</span>);
+<span class="kw">else</span>                   <span class="fn">printf</span>(<span class="st">"F"</span>);</div>
+      <div class="note warn">Check highest value first. If you check >=70 first, marks=95 also matches wrongly.</div>
+    </div>
+    <div class="block"><div class="block-title">Nested if (without &&)</div>
+      <div class="code"><span class="cm">// Largest of 3 — WITHOUT using &&</span>
+<span class="kw">if</span>(a > b) {
+    <span class="kw">if</span>(a > c) <span class="fn">printf</span>(<span class="st">"a largest"</span>);
+    <span class="kw">else</span>      <span class="fn">printf</span>(<span class="st">"c largest"</span>);
+} <span class="kw">else</span> {
+    <span class="kw">if</span>(b > c) <span class="fn">printf</span>(<span class="st">"b largest"</span>);
+    <span class="kw">else</span>      <span class="fn">printf</span>(<span class="st">"c largest"</span>);
+}</div>
+    </div>
+    <div class="block"><div class="block-title">Switch Statement</div>
+      <div class="code"><span class="kw">switch</span>(op) {
+    <span class="kw">case</span> <span class="st">'+'</span>: <span class="fn">printf</span>(<span class="st">"%.2f"</span>, a+b); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="st">'-'</span>: <span class="fn">printf</span>(<span class="st">"%.2f"</span>, a-b); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="st">'*'</span>: <span class="fn">printf</span>(<span class="st">"%.2f"</span>, a*b); <span class="kw">break</span>;
+    <span class="kw">case</span> <span class="st">'/'</span>: b!=<span class="nm">0</span>?<span class="fn">printf</span>(<span class="st">"%.2f"</span>,a/b):<span class="fn">printf</span>(<span class="st">"Div by 0"</span>); <span class="kw">break</span>;
+    <span class="kw">default</span>:  <span class="fn">printf</span>(<span class="st">"Invalid"</span>);
+}</div>
+      <div class="note warn"><strong>Missing break = fall-through</strong> — all cases after matching one also run. Always add break!</div>
+      <div class="note">Switch can only compare int and char — NOT float, NOT ranges like &gt;=90.</div>
+      <div class="note">Multiple cases → same handler: <span class="ic">case 'a': case 'e': case 'i':</span> all go to vowel handler.</div>
+    </div>
+    <div class="block"><div class="block-title">Operators Cheatsheet</div>
+      <table class="tbl"><tr><th>Operator</th><th>Meaning</th><th>Example</th></tr>
+        <tr><td><span class="ic">==</span></td><td>Equal to</td><td><span class="ic">a == 5</span></td></tr>
+        <tr><td><span class="ic">!=</span></td><td>Not equal</td><td><span class="ic">a != 0</span></td></tr>
+        <tr><td><span class="ic">&amp;&amp;</span></td><td>AND — both true</td><td><span class="ic">a&gt;0 &amp;&amp; b&gt;0</span></td></tr>
+        <tr><td><span class="ic">||</span></td><td>OR — one true</td><td><span class="ic">a==0 || b==0</span></td></tr>
+        <tr><td><span class="ic">!</span></td><td>NOT — flip</td><td><span class="ic">!(a==b)</span></td></tr>
+      </table>
+    </div>
+    <div class="note good">After reading this → go to If-Else Practice page and do all 7 problems right now!</div>
+  </div>
+</div>
+
+<div class="page" id="pg-t-loops">
+  <div class="ptop"><div class="ptop-eye">Theory · Module III</div><div class="ptop-title">🔁 Loops & Patterns</div><div class="ptop-sub">Repeat code — for, while, do-while, nested loops</div></div>
+  <div class="pbody">
+    <div class="block"><div class="block-title">for loop</div>
+      <div class="code"><span class="kw">for</span>(init; condition; update) { body }
+
+<span class="cm">// Print 1 to N</span>
+<span class="kw">for</span>(<span class="kw">int</span> i = <span class="nm">1</span>; i <= n; i++) <span class="fn">printf</span>(<span class="st">"%d "</span>, i);
+
+<span class="cm">// Array input</span>
+<span class="kw">for</span>(i = <span class="nm">0</span>; i &lt; n; i++) <span class="fn">scanf</span>(<span class="st">"%d"</span>, &arr[i]);</div>
+      <div class="g2">
+        <div class="gc"><div class="gc-label">init</div><div class="gc-val">int i = 0</div><div class="gc-desc">Runs once at start</div></div>
+        <div class="gc"><div class="gc-label">condition</div><div class="gc-val">i &lt; n</div><div class="gc-desc">Checked before each iteration</div></div>
+        <div class="gc"><div class="gc-label">update</div><div class="gc-val">i++</div><div class="gc-desc">Runs after each iteration</div></div>
+        <div class="gc"><div class="gc-label">body</div><div class="gc-val">printf(...)</div><div class="gc-desc">Runs while condition is true</div></div>
+      </div>
+    </div>
+    <div class="block"><div class="block-title">while loop</div>
+      <div class="code"><span class="kw">while</span>(condition) { body }   <span class="cm">// checks BEFORE running</span>
+
+<span class="cm">// Reverse a number</span>
+<span class="kw">while</span>(n != <span class="nm">0</span>) {
+    rem = n % <span class="nm">10</span>;        <span class="cm">// last digit</span>
+    rev = rev * <span class="nm">10</span> + rem; <span class="cm">// append</span>
+    n /= <span class="nm">10</span>;              <span class="cm">// remove last digit</span>
+}</div>
+      <div class="note warn">Always ensure condition becomes false eventually — or infinite loop!</div>
+    </div>
+    <div class="block"><div class="block-title">break and continue</div>
+      <div class="code"><span class="cm">// break — exit loop immediately</span>
+<span class="kw">for</span>(i=<span class="nm">2</span>; i&lt;=n/<span class="nm">2</span>; i++)
+    <span class="kw">if</span>(n%i==<span class="nm">0</span>) { isPrime=<span class="nm">0</span>; <span class="kw">break</span>; }  <span class="cm">// found divisor, stop</span>
+
+<span class="cm">// continue — skip current iteration</span>
+<span class="kw">for</span>(i=<span class="nm">1</span>; i&lt;=<span class="nm">10</span>; i++) {
+    <span class="kw">if</span>(i%<span class="nm">2</span>==<span class="nm">0</span>) <span class="kw">continue</span>;  <span class="cm">// skip even numbers</span>
+    <span class="fn">printf</span>(<span class="st">"%d "</span>, i);       <span class="cm">// prints odd only</span>
+}</div>
+    </div>
+    <div class="block"><div class="block-title">Star Pyramid — Nested Loop (exam guarantee)</div>
+      <div class="code"><span class="cm">// Centered pyramid — n rows</span>
+<span class="kw">for</span>(i=<span class="nm">1</span>; i&lt;=n; i++) {
+    <span class="kw">for</span>(j=i; j&lt;n; j++) <span class="fn">printf</span>(<span class="st">" "</span>);       <span class="cm">// (n-i) spaces</span>
+    <span class="kw">for</span>(j=<span class="nm">1</span>; j&lt;=<span class="nm">2</span>*i-<span class="nm">1</span>; j++) <span class="fn">printf</span>(<span class="st">"*"</span>); <span class="cm">// (2i-1) stars</span>
+    <span class="fn">printf</span>(<span class="st">"\n"</span>);
+}</div>
+      <div class="note">Formula to memorize: Row i → spaces = (n-i), stars = (2i-1)</div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="pg-t-arrays">
+  <div class="ptop"><div class="ptop-eye">Theory · Module III</div><div class="ptop-title">📦 Arrays & Strings</div><div class="ptop-sub">Store multiple values, sorting, searching, string handling</div></div>
+  <div class="pbody">
+    <div class="block"><div class="block-title">Arrays</div>
+      <div class="code"><span class="kw">int</span> arr[<span class="nm">5</span>] = {<span class="nm">10</span>,<span class="nm">20</span>,<span class="nm">30</span>,<span class="nm">40</span>,<span class="nm">50</span>};
+<span class="cm">//  index: 0   1   2   3   4</span>
+
+arr[<span class="nm">0</span>] = <span class="nm">10</span>;   <span class="cm">// first element</span>
+arr[<span class="nm">4</span>] = <span class="nm">50</span>;   <span class="cm">// last element (NOT arr[5]!)</span>
+
+<span class="kw">for</span>(i=<span class="nm">0</span>; i&lt;n; i++) <span class="fn">scanf</span>(<span class="st">"%d"</span>, &arr[i]);  <span class="cm">// input</span>
+<span class="kw">for</span>(i=<span class="nm">0</span>; i&lt;n; i++) <span class="fn">printf</span>(<span class="st">"%d "</span>, arr[i]); <span class="cm">// output</span></div>
+      <div class="note warn">Index starts at 0! Array size n → valid indices: 0 to n-1. arr[n] = out of bounds error!</div>
+    </div>
+    <div class="block"><div class="block-title">Bubble Sort — Must Know!</div>
+      <div class="code"><span class="kw">for</span>(i=<span class="nm">0</span>; i&lt;n-<span class="nm">1</span>; i++) {           <span class="cm">// n-1 passes</span>
+    <span class="kw">for</span>(j=<span class="nm">0</span>; j&lt;n-i-<span class="nm">1</span>; j++) {    <span class="cm">// compare adjacent</span>
+        <span class="kw">if</span>(arr[j] > arr[j+<span class="nm">1</span>]) {  <span class="cm">// wrong order?</span>
+            t=arr[j]; arr[j]=arr[j+<span class="nm">1</span>]; arr[j+<span class="nm">1</span>]=t; <span class="cm">// swap</span>
+        }
+    }
+}
+<span class="cm">// Descending: change arr[j] > arr[j+1]  to  arr[j] < arr[j+1]</span></div>
+      <div class="note">Trace: {5,3,8,1} → pass1:{3,5,1,8} → pass2:{3,1,5,8} → pass3:{1,3,5,8}</div>
+    </div>
+    <div class="block"><div class="block-title">Strings</div>
+      <div class="code"><span class="kw">char</span> name[<span class="nm">50</span>] = <span class="st">"hello"</span>;
+<span class="cm">// stored as: h e l l o \0  ← null terminator marks end</span>
+
+<span class="fn">scanf</span>(<span class="st">"%s"</span>, name);        <span class="cm">// no & for strings!</span>
+<span class="fn">printf</span>(<span class="st">"%s"</span>, name);
+
+<span class="pp">#include</span><span class="st">&lt;string.h&gt;</span>
+<span class="fn">strlen</span>(s)          <span class="cm">// length (not counting \0)</span>
+<span class="fn">strcpy</span>(dest, src)  <span class="cm">// copy string</span>
+<span class="fn">strcmp</span>(s1, s2)     <span class="cm">// compare: 0 = equal</span>
+
+<span class="cm">// Palindrome WITHOUT strrev</span>
+<span class="kw">for</span>(i=<span class="nm">0</span>; i&lt;len/<span class="nm">2</span>; i++)
+    <span class="kw">if</span>(s[i] != s[len-<span class="nm">1</span>-i]) { flag=<span class="nm">0</span>; <span class="kw">break</span>; }</div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="pg-t-func">
+  <div class="ptop"><div class="ptop-eye">Theory · Module IV</div><div class="ptop-title">⚙️ Functions & Recursion</div><div class="ptop-sub">Reusable code, call by value vs reference, recursion</div></div>
+  <div class="pbody">
+    <div class="block"><div class="block-title">Function Syntax</div>
+      <div class="code"><span class="tp">return_type</span> <span class="fn">functionName</span>(<span class="tp">parameters</span>) {
+    <span class="kw">return</span> value;
+}
+
+<span class="kw">int</span> <span class="fn">add</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) { <span class="kw">return</span> a + b; }
+
+<span class="kw">int</span> <span class="fn">main</span>() {
+    <span class="kw">int</span> result = <span class="fn">add</span>(<span class="nm">5</span>, <span class="nm">3</span>);  <span class="cm">// call → 8</span>
+    <span class="kw">return</span> <span class="nm">0</span>;
+}</div>
+    </div>
+    <div class="block"><div class="block-title">Call by Value vs Call by Reference</div>
+      <div class="code"><span class="cm">// VALUE — copy passed, original unchanged</span>
+<span class="kw">void</span> <span class="fn">swapVal</span>(<span class="kw">int</span> a, <span class="kw">int</span> b) {
+    <span class="kw">int</span> t=a; a=b; b=t;   <span class="cm">// only copies change!</span>
+}
+
+<span class="cm">// REFERENCE — address passed, original changes</span>
+<span class="kw">void</span> <span class="fn">swapRef</span>(<span class="kw">int</span> *a, <span class="kw">int</span> *b) {
+    <span class="kw">int</span> t=*a; *a=*b; *b=t;  <span class="cm">// * = go to address</span>
+}
+
+<span class="fn">swapVal</span>(x, y);   <span class="cm">// x, y unchanged</span>
+<span class="fn">swapRef</span>(&x, &y); <span class="cm">// x, y actually swapped!</span></div>
+      <div class="note">Memory analogy: Value = photocopy (safe), Reference = original document (changes stick)</div>
+    </div>
+    <div class="block"><div class="block-title">Recursion</div>
+      <div class="code"><span class="kw">int</span> <span class="fn">factorial</span>(<span class="kw">int</span> n) {
+    <span class="kw">if</span>(n==<span class="nm">0</span>||n==<span class="nm">1</span>) <span class="kw">return</span> <span class="nm">1</span>;    <span class="cm">// BASE CASE — stop here</span>
+    <span class="kw">return</span> n * <span class="fn">factorial</span>(n-<span class="nm">1</span>);   <span class="cm">// RECURSIVE CALL</span>
+}
+<span class="cm">// factorial(4) = 4 × 3 × 2 × 1 = 24</span>
+
+<span class="kw">int</span> <span class="fn">fib</span>(<span class="kw">int</span> n) {
+    <span class="kw">if</span>(n&lt;=<span class="nm">1</span>) <span class="kw">return</span> n;
+    <span class="kw">return</span> <span class="fn">fib</span>(n-<span class="nm">1</span>) + <span class="fn">fib</span>(n-<span class="nm">2</span>);
+}</div>
+      <div class="note warn">Missing base case = infinite recursion = stack overflow = crash. Always add base case!</div>
+      <div class="g2">
+        <div class="gc"><div class="gc-label">Base Case</div><div class="gc-val">if(n==0) return 1</div><div class="gc-desc">When to STOP — mandatory!</div></div>
+        <div class="gc"><div class="gc-label">Recursive Call</div><div class="gc-val">return n * f(n-1)</div><div class="gc-desc">Smaller version of problem</div></div>
+      </div>
+    </div>
+    <div class="block"><div class="block-title">Scope & Lifetime</div>
+      <table class="tbl">
+        <tr><th>Type</th><th>Declared</th><th>Accessible</th><th>Lifetime</th></tr>
+        <tr><td>Local</td><td>Inside function</td><td>Only that function</td><td>Function runs</td></tr>
+        <tr><td>Global</td><td>Outside all functions</td><td>Everywhere</td><td>Entire program</td></tr>
+        <tr><td>Parameter</td><td>Function signature</td><td>Inside function</td><td>Function runs</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="pg-t-struct">
+  <div class="ptop"><div class="ptop-eye">Theory · Module V</div><div class="ptop-title">🗂️ Structures & Pointers</div><div class="ptop-sub">Custom types, typedef, pointers, array of structs</div></div>
+  <div class="pbody">
+    <div class="block"><div class="block-title">Structure</div>
+      <div class="code"><span class="kw">struct</span> <span class="tp">Student</span> {
+    <span class="kw">int</span>   roll;
+    <span class="kw">char</span>  name[<span class="nm">50</span>];
+    <span class="kw">float</span> marks;
+};  <span class="cm">// semicolon here!</span>
+
+<span class="kw">struct</span> <span class="tp">Student</span> s1;
+s1.roll  = <span class="nm">101</span>;          <span class="cm">// dot operator</span>
+s1.marks = <span class="nm">89.5</span>;
+<span class="fn">scanf</span>(<span class="st">"%s"</span>, s1.name);</div>
+    </div>
+    <div class="block"><div class="block-title">Array of Structures</div>
+      <div class="code"><span class="kw">struct</span> <span class="tp">Student</span> s[<span class="nm">5</span>];   <span class="cm">// 5 students</span>
+<span class="kw">for</span>(i=<span class="nm">0</span>; i&lt;<span class="nm">5</span>; i++)
+    <span class="fn">scanf</span>(<span class="st">"%d %s %f"</span>, &s[i].roll, s[i].name, &s[i].marks);
+
+<span class="cm">// Find topper</span>
+<span class="kw">int</span> maxIdx = <span class="nm">0</span>;
+<span class="kw">for</span>(i=<span class="nm">1</span>; i&lt;<span class="nm">5</span>; i++)
+    <span class="kw">if</span>(s[i].marks > s[maxIdx].marks) maxIdx = i;
+<span class="fn">printf</span>(<span class="st">"Topper: %s"</span>, s[maxIdx].name);</div>
+    </div>
+    <div class="block"><div class="block-title">typedef struct</div>
+      <div class="code"><span class="kw">typedef</span> <span class="kw">struct</span> { <span class="kw">int</span> id; <span class="kw">char</span> name[<span class="nm">50</span>]; } <span class="tp">Student</span>;
+<span class="tp">Student</span> s;   <span class="cm">// no need to write 'struct' keyword now</span></div>
+    </div>
+    <div class="block"><div class="block-title">Pointers</div>
+      <div class="code"><span class="kw">int</span>  x = <span class="nm">10</span>;
+<span class="kw">int</span> *p = &x;     <span class="cm">// p stores ADDRESS of x</span>
+
+<span class="fn">printf</span>(<span class="st">"%d"</span>, x);   <span class="cm">// 10  — value of x</span>
+<span class="fn">printf</span>(<span class="st">"%d"</span>, *p);  <span class="cm">// 10  — value AT address p</span>
+*p = <span class="nm">99</span>;           <span class="cm">// changes x to 99!</span>
+
+<span class="cm">// Swap using pointers</span>
+<span class="kw">void</span> <span class="fn">swap</span>(<span class="kw">int</span> *a, <span class="kw">int</span> *b) {
+    <span class="kw">int</span> t=*a; *a=*b; *b=t;
+}
+<span class="fn">swap</span>(&x, &y);   <span class="cm">// pass addresses</span></div>
+      <div class="g2">
+        <div class="gc"><div class="gc-label">&x</div><div class="gc-val">address-of x</div><div class="gc-desc">Where is x in memory?</div></div>
+        <div class="gc"><div class="gc-label">*p</div><div class="gc-val">dereference p</div><div class="gc-desc">Value at address stored in p</div></div>
+        <div class="gc"><div class="gc-label">int *p</div><div class="gc-val">pointer declaration</div><div class="gc-desc">p is a pointer to int</div></div>
+        <div class="gc"><div class="gc-label">p+1</div><div class="gc-val">next int address</div><div class="gc-desc">Moves 4 bytes (size of int)</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRACTICE PAGES (placeholders filled by JS) ══ -->
+<div class="page" id="pg-p-ifelse">
+  <div class="ptop"><div class="ptop-eye">Practice · If-Else & Switch</div><div class="ptop-title">🔀 If-Else Problems</div><div class="ptop-sub">7 problems — try without hint first!</div></div>
+  <div class="pbody"><div id="pl-ifelse"></div></div>
+</div>
+<div class="page" id="pg-p-loops">
+  <div class="ptop"><div class="ptop-eye">Practice · Loops</div><div class="ptop-title">🔁 Loop Problems</div><div class="ptop-sub">7 problems — logic testing starts here!</div></div>
+  <div class="pbody"><div id="pl-loops"></div></div>
+</div>
+<div class="page" id="pg-p-arrays">
+  <div class="ptop"><div class="ptop-eye">Practice · Arrays & Strings</div><div class="ptop-title">📦 Array Problems</div><div class="ptop-sub">7 problems — highest exam weightage!</div></div>
+  <div class="pbody"><div id="pl-arrays"></div></div>
+</div>
+<div class="page" id="pg-p-func">
+  <div class="ptop"><div class="ptop-eye">Practice · Functions</div><div class="ptop-title">⚙️ Function Problems</div><div class="ptop-sub">6 problems — recursion logic will be tested!</div></div>
+  <div class="pbody"><div id="pl-func"></div></div>
+</div>
+<div class="page" id="pg-p-struct">
+  <div class="ptop"><div class="ptop-eye">Practice · Structures</div><div class="ptop-title">🗂️ Structure Problems</div><div class="ptop-sub">6 problems — practical exam favourite!</div></div>
+  <div class="pbody"><div id="pl-struct"></div></div>
+</div>
+
+<!-- ══ VIVA ══ -->
+<div class="page" id="pg-viva">
+  <div class="ptop"><div class="ptop-eye">Viva Preparation</div><div class="ptop-title">🎤 Viva Questions</div><div class="ptop-sub">30 most asked — click to reveal answer</div></div>
+  <div class="pbody"><div id="viva-list"></div></div>
+</div>
+
+</div><!-- end main -->
+</div><!-- end shell -->
+
+<!-- AUTOCOMPLETE -->
+<div class="ac-drop" id="acdrop"></div>
+
+<script>
+// ════ DATA ════
+const PROBS={
+ifelse:[
+  {id:'i1',t:'Largest of 3 Numbers',p:'fire',h:`if(a>b && a>c) → a\nelse if(b>c)   → b\nelse           → c\n\nTwist: "without &&" → use nested if`,s:`#include<stdio.h>\nint main(){\n    int a,b,c;\n    printf("Enter 3 numbers: ");\n    scanf("%d %d %d",&a,&b,&c);\n    if(a>b&&a>c) printf("Largest=%d",a);\n    else if(b>c) printf("Largest=%d",b);\n    else         printf("Largest=%d",c);\n    return 0;\n}`},
+  {id:'i2',t:'Grade Calculator',p:'fire',h:`>=90→A, >=80→B, >=70→C, >=60→D, else→F\nCheck from HIGHEST to LOWEST!`,s:`#include<stdio.h>\nint main(){\n    int m; printf("Marks: "); scanf("%d",&m);\n    if(m>=90)      printf("A");\n    else if(m>=80) printf("B");\n    else if(m>=70) printf("C");\n    else if(m>=60) printf("D");\n    else           printf("F");\n    return 0;\n}`},
+  {id:'i3',t:'Calculator using Switch',p:'fire',h:`Read operator as char.\nswitch(op): case '+' '-' '*' '/'\nFor '/': check b!=0 first\ndefault: invalid`,s:`#include<stdio.h>\nint main(){\n    float a,b; char op;\n    printf("Enter num op num: ");\n    scanf("%f %c %f",&a,&op,&b);\n    switch(op){\n        case '+': printf("%.2f",a+b); break;\n        case '-': printf("%.2f",a-b); break;\n        case '*': printf("%.2f",a*b); break;\n        case '/': b!=0?printf("%.2f",a/b):printf("Div by 0"); break;\n        default:  printf("Invalid");\n    }\n    return 0;\n}`},
+  {id:'i4',t:'Even/Odd + Positive/Negative',p:'high',h:`Two separate checks:\n1. if(n%2==0) Even else Odd\n2. if(n>0) +ve, elif(n<0) -ve, else Zero`,s:`#include<stdio.h>\nint main(){\n    int n; printf("Enter: "); scanf("%d",&n);\n    printf(n%2==0?"Even\\n":"Odd\\n");\n    if(n>0)      printf("Positive");\n    else if(n<0) printf("Negative");\n    else         printf("Zero");\n    return 0;\n}`},
+  {id:'i5',t:'Leap Year Check',p:'high',h:`(year%4==0 && year%100!=0) || year%400==0\n\n2000→Leap ✓  1900→Not Leap ✗  2024→Leap ✓`,s:`#include<stdio.h>\nint main(){\n    int y; printf("Year: "); scanf("%d",&y);\n    if((y%4==0&&y%100!=0)||y%400==0)\n        printf("%d is Leap Year",y);\n    else printf("%d is NOT Leap Year",y);\n    return 0;\n}`},
+  {id:'i6',t:'Vowel or Consonant (switch)',p:'medium',h:`case 'a': case 'e': case 'i': case 'o': case 'u':\n(same for uppercase A E I O U)\n    → Vowel\ndefault → Consonant`,s:`#include<stdio.h>\nint main(){\n    char ch; printf("Character: "); scanf(" %c",&ch);\n    switch(ch){\n        case 'a': case 'e': case 'i': case 'o': case 'u':\n        case 'A': case 'E': case 'I': case 'O': case 'U':\n            printf("Vowel"); break;\n        default: printf("Consonant");\n    }\n    return 0;\n}`},
+  {id:'i7',t:'Triangle Type',p:'medium',h:`if(a==b && b==c) → Equilateral\nelse if(a==b || b==c || a==c) → Isosceles\nelse → Scalene`,s:`#include<stdio.h>\nint main(){\n    int a,b,c; printf("3 sides: "); scanf("%d %d %d",&a,&b,&c);\n    if(a==b&&b==c) printf("Equilateral");\n    else if(a==b||b==c||a==c) printf("Isosceles");\n    else printf("Scalene");\n    return 0;\n}`},
+],
+loops:[
+  {id:'l1',t:'Star Pyramid',p:'fire',h:`Row i: spaces=(n-i), stars=(2i-1)\nOuter: i=1 to n\nInner1: print spaces (n-i times)\nInner2: print stars (2i-1 times)\nThen \\n`,s:`#include<stdio.h>\nint main(){\n    int n,i,j; printf("Rows: "); scanf("%d",&n);\n    for(i=1;i<=n;i++){\n        for(j=i;j<n;j++) printf(" ");\n        for(j=1;j<=2*i-1;j++) printf("*");\n        printf("\\n");\n    }\n    return 0;\n}`},
+  {id:'l2',t:'Prime Number Check',p:'fire',h:`Loop i=2 to n/2:\n  if n%i==0 → not prime, break\nIf no divisor → prime\n\nn<=1 → NOT prime`,s:`#include<stdio.h>\nint main(){\n    int n,i,isPrime=1;\n    printf("Enter: "); scanf("%d",&n);\n    if(n<=1) isPrime=0;\n    for(i=2;i<=n/2;i++)\n        if(n%i==0){isPrime=0;break;}\n    printf(isPrime?"%d is Prime":"%d is NOT Prime",n);\n    return 0;\n}`},
+  {id:'l3',t:'Fibonacci Series (Loop)',p:'fire',h:`a=0, b=1\nEach step:\n  print a\n  next=a+b, a=b, b=next\n\n0 1 1 2 3 5 8 13...`,s:`#include<stdio.h>\nint main(){\n    int n,a=0,b=1,next,i;\n    printf("N: "); scanf("%d",&n);\n    printf("Fibonacci: ");\n    for(i=0;i<n;i++){\n        printf("%d ",a);\n        next=a+b; a=b; b=next;\n    }\n    return 0;\n}`},
+  {id:'l4',t:'Armstrong Number',p:'high',h:`153=1³+5³+3³=153 ✓\n1. Count digits\n2. For each digit: sum += digit^count\n3. if sum==n → Armstrong`,s:`#include<stdio.h>\n#include<math.h>\nint main(){\n    int n,temp,sum=0,rem,d=0;\n    printf("Enter: "); scanf("%d",&n);\n    temp=n;\n    while(temp){d++;temp/=10;}\n    temp=n;\n    while(temp){rem=temp%10;sum+=(int)pow(rem,d);temp/=10;}\n    printf(sum==n?"%d is Armstrong":"%d is NOT Armstrong",n);\n    return 0;\n}`},
+  {id:'l5',t:'Reverse a Number',p:'high',h:`rem=n%10 (last digit)\nrev=rev*10+rem\nn=n/10 (remove last)\n\n1234 → 4321`,s:`#include<stdio.h>\nint main(){\n    int n,rev=0,rem;\n    printf("Enter: "); scanf("%d",&n);\n    while(n!=0){rem=n%10;rev=rev*10+rem;n/=10;}\n    printf("Reversed=%d",rev);\n    return 0;\n}`},
+  {id:'l6',t:'All Primes from 1 to N',p:'high',h:`Outer: i=2 to N\nFor each i: inner loop checks if prime\nIf prime → print i`,s:`#include<stdio.h>\nint main(){\n    int n,i,j,p;\n    printf("N: "); scanf("%d",&n);\n    printf("Primes: ");\n    for(i=2;i<=n;i++){\n        p=1;\n        for(j=2;j<=i/2;j++) if(i%j==0){p=0;break;}\n        if(p) printf("%d ",i);\n    }\n    return 0;\n}`},
+  {id:'l7',t:'Sum of Series 1²+2²+...+N²',p:'medium',h:`sum=0\nfor i=1 to n:\n    sum += i*i\nprint sum`,s:`#include<stdio.h>\nint main(){\n    int n,i,sum=0;\n    printf("N: "); scanf("%d",&n);\n    for(i=1;i<=n;i++) sum+=i*i;\n    printf("Sum=%d",sum);\n    return 0;\n}`},
+],
+arrays:[
+  {id:'a1',t:'Bubble Sort (Ascending)',p:'fire',h:`Two nested loops.\nOuter: n-1 passes\nInner: if arr[j]>arr[j+1] → swap\n\nDescending: change > to <`,s:`#include<stdio.h>\nint main(){\n    int arr[100],n,i,j,t;\n    printf("Size: "); scanf("%d",&n);\n    for(i=0;i<n;i++) scanf("%d",&arr[i]);\n    for(i=0;i<n-1;i++)\n        for(j=0;j<n-i-1;j++)\n            if(arr[j]>arr[j+1]){t=arr[j];arr[j]=arr[j+1];arr[j+1]=t;}\n    printf("Sorted: ");\n    for(i=0;i<n;i++) printf("%d ",arr[i]);\n    return 0;\n}`},
+  {id:'a2',t:'Largest & Smallest in Array',p:'fire',h:`max=arr[0], min=arr[0]\nLoop i=1 to n-1:\n  if arr[i]>max → max=arr[i]\n  if arr[i]<min → min=arr[i]`,s:`#include<stdio.h>\nint main(){\n    int arr[100],n,i,max,min;\n    printf("Size: "); scanf("%d",&n);\n    for(i=0;i<n;i++) scanf("%d",&arr[i]);\n    max=min=arr[0];\n    for(i=1;i<n;i++){\n        if(arr[i]>max) max=arr[i];\n        if(arr[i]<min) min=arr[i];\n    }\n    printf("Max=%d Min=%d",max,min);\n    return 0;\n}`},
+  {id:'a3',t:'Palindrome String (no strrev)',p:'fire',h:`Compare s[i] with s[len-1-i]\nfor i=0 to len/2\nMismatch → not palindrome\n\n"madam" ✓  "hello" ✗`,s:`#include<stdio.h>\n#include<string.h>\nint main(){\n    char s[100]; int i,len,f=1;\n    printf("String: "); scanf("%s",s);\n    len=strlen(s);\n    for(i=0;i<len/2;i++)\n        if(s[i]!=s[len-1-i]){f=0;break;}\n    printf(f?"Palindrome":"Not Palindrome");\n    return 0;\n}`},
+  {id:'a4',t:'Reverse an Array',p:'high',h:`i=0, j=n-1\nWhile i<j:\n  swap arr[i] and arr[j]\n  i++, j--`,s:`#include<stdio.h>\nint main(){\n    int arr[100],n,i,t;\n    printf("Size: "); scanf("%d",&n);\n    for(i=0;i<n;i++) scanf("%d",&arr[i]);\n    for(i=0;i<n/2;i++){t=arr[i];arr[i]=arr[n-1-i];arr[n-1-i]=t;}\n    printf("Reversed: ");\n    for(i=0;i<n;i++) printf("%d ",arr[i]);\n    return 0;\n}`},
+  {id:'a5',t:'Count Vowels & Consonants',p:'high',h:`Loop each character:\nif a/e/i/o/u (upper+lower) → vowels++\nelse if letter → consonants++`,s:`#include<stdio.h>\nint main(){\n    char s[200]; int i,v=0,c=0;\n    printf("String: "); scanf("%s",s);\n    for(i=0;s[i];i++){\n        char ch=s[i];\n        if(ch=='a'||ch=='e'||ch=='i'||ch=='o'||ch=='u'||\n           ch=='A'||ch=='E'||ch=='I'||ch=='O'||ch=='U') v++;\n        else if((ch>='a'&&ch<='z')||(ch>='A'&&ch<='Z')) c++;\n    }\n    printf("Vowels=%d Consonants=%d",v,c);\n    return 0;\n}`},
+  {id:'a6',t:'Linear Search',p:'medium',h:`Loop i=0 to n-1:\n  if arr[i]==target → found at index i\nIf loop ends without match → Not Found`,s:`#include<stdio.h>\nint main(){\n    int arr[100],n,i,x,f=-1;\n    printf("Size: "); scanf("%d",&n);\n    for(i=0;i<n;i++) scanf("%d",&arr[i]);\n    printf("Search: "); scanf("%d",&x);\n    for(i=0;i<n;i++) if(arr[i]==x){f=i;break;}\n    if(f>=0) printf("Found at index %d",f);\n    else printf("Not Found");\n    return 0;\n}`},
+  {id:'a7',t:'Matrix Addition (2D Array)',p:'medium',h:`C[i][j] = A[i][j] + B[i][j]\nUse nested for loops for input and sum.\nPrint result matrix row by row.`,s:`#include<stdio.h>\nint main(){\n    int a[3][3],b[3][3],i,j;\n    printf("Matrix A:\\n");\n    for(i=0;i<3;i++) for(j=0;j<3;j++) scanf("%d",&a[i][j]);\n    printf("Matrix B:\\n");\n    for(i=0;i<3;i++) for(j=0;j<3;j++) scanf("%d",&b[i][j]);\n    printf("Sum:\\n");\n    for(i=0;i<3;i++){for(j=0;j<3;j++) printf("%d ",a[i][j]+b[i][j]);printf("\\n");}\n    return 0;\n}`},
+],
+func:[
+  {id:'f1',t:'Factorial using Recursion',p:'fire',h:`Base: if(n==0||n==1) return 1\nRecursive: return n * factorial(n-1)\n\n5!=120, 0!=1`,s:`#include<stdio.h>\nint factorial(int n){\n    if(n==0||n==1) return 1;\n    return n*factorial(n-1);\n}\nint main(){\n    int n; printf("n: "); scanf("%d",&n);\n    printf("%d!=%d",n,factorial(n));\n    return 0;\n}`},
+  {id:'f2',t:'Fibonacci using Recursion',p:'fire',h:`Base: if(n<=1) return n\nRecursive: return fib(n-1)+fib(n-2)\n\nfib(0)=0, fib(1)=1, fib(5)=5`,s:`#include<stdio.h>\nint fib(int n){if(n<=1)return n; return fib(n-1)+fib(n-2);}\nint main(){\n    int n,i; printf("N: "); scanf("%d",&n);\n    for(i=0;i<n;i++) printf("%d ",fib(i));\n    return 0;\n}`},
+  {id:'f3',t:'Swap: Value vs Reference',p:'fire',h:`VALUE: void swap(int a,int b) → copies, unchanged\nREFERENCE: void swap(int *a,int *b)\n  *a, *b change originals\nCall: swap(&x,&y)`,s:`#include<stdio.h>\nvoid swapVal(int a,int b){int t=a;a=b;b=t;printf("Inside val: %d %d\\n",a,b);}\nvoid swapRef(int *a,int *b){int t=*a;*a=*b;*b=t;}\nint main(){\n    int x=10,y=20;\n    swapVal(x,y); printf("After val: x=%d y=%d\\n",x,y);\n    swapRef(&x,&y); printf("After ref: x=%d y=%d\\n",x,y);\n    return 0;\n}`},
+  {id:'f4',t:'GCD using Recursion',p:'high',h:`Euclidean Algorithm:\nBase: if(b==0) return a\nRecursive: return gcd(b, a%b)\n\ngcd(48,18)→gcd(18,12)→gcd(12,6)→6`,s:`#include<stdio.h>\nint gcd(int a,int b){if(b==0)return a; return gcd(b,a%b);}\nint main(){\n    int a,b; printf("Two numbers: "); scanf("%d %d",&a,&b);\n    printf("GCD=%d",gcd(a,b)); return 0;\n}`},
+  {id:'f5',t:'Check Prime via Function',p:'high',h:`int isPrime(int n){\n  if(n<=1) return 0;\n  for i=2 to n/2: if n%i==0 return 0;\n  return 1;\n}\nCall from main.`,s:`#include<stdio.h>\nint isPrime(int n){\n    if(n<=1) return 0;\n    for(int i=2;i<=n/2;i++) if(n%i==0) return 0;\n    return 1;\n}\nint main(){\n    int n; printf("Enter: "); scanf("%d",&n);\n    printf(isPrime(n)?"%d is Prime":"%d is NOT Prime",n);\n    return 0;\n}`},
+  {id:'f6',t:'Power(x,n) Recursion',p:'medium',h:`Base: if(n==0) return 1\nRecursive: return x * power(x, n-1)\n\npower(2,5)=32`,s:`#include<stdio.h>\nint power(int x,int n){if(n==0)return 1; return x*power(x,n-1);}\nint main(){\n    int x,n; printf("x n: "); scanf("%d %d",&x,&n);\n    printf("%d^%d=%d",x,n,power(x,n)); return 0;\n}`},
+],
+struct:[
+  {id:'s1',t:'Student Record — Input & Display',p:'fire',h:`struct Student{int roll;char name[50];float marks;};\nstruct Student s;\ns.roll=101;  // dot operator`,s:`#include<stdio.h>\nstruct Student{int roll;char name[50];float marks;};\nint main(){\n    struct Student s;\n    printf("Roll: "); scanf("%d",&s.roll);\n    printf("Name: "); scanf("%s",s.name);\n    printf("Marks: "); scanf("%f",&s.marks);\n    printf("\\n%d %s %.2f",s.roll,s.name,s.marks);\n    return 0;\n}`},
+  {id:'s2',t:'Array of Structs — Find Topper',p:'fire',h:`struct Student s[5];\nfor loop → input all 5\nfind maxIdx where marks is highest\nprint s[maxIdx]`,s:`#include<stdio.h>\nstruct Student{int roll;char name[50];float marks;};\nint main(){\n    struct Student s[5]; int i,maxIdx=0;\n    for(i=0;i<5;i++){printf("S%d: ",i+1);scanf("%d %s %f",&s[i].roll,s[i].name,&s[i].marks);}\n    for(i=1;i<5;i++) if(s[i].marks>s[maxIdx].marks) maxIdx=i;\n    printf("Topper: %s (%.2f)",s[maxIdx].name,s[maxIdx].marks);\n    return 0;\n}`},
+  {id:'s3',t:'Swap using Pointers',p:'high',h:`void swap(int *a,int *b){\n  int t=*a; *a=*b; *b=t;\n}\nCall: swap(&x,&y)`,s:`#include<stdio.h>\nvoid swap(int *a,int *b){int t=*a;*a=*b;*b=t;}\nint main(){\n    int x,y; printf("Two numbers: "); scanf("%d %d",&x,&y);\n    printf("Before: x=%d y=%d\\n",x,y);\n    swap(&x,&y);\n    printf("After:  x=%d y=%d\\n",x,y);\n    return 0;\n}`},
+  {id:'s4',t:'typedef struct',p:'high',h:`typedef struct{int id;char name[50];}Student;\nStudent s;  // no 'struct' keyword needed`,s:`#include<stdio.h>\ntypedef struct{int id;char name[50];float gpa;}Student;\nint main(){\n    Student s;\n    printf("ID: "); scanf("%d",&s.id);\n    printf("Name: "); scanf("%s",s.name);\n    printf("GPA: "); scanf("%f",&s.gpa);\n    printf("\\n%d | %s | %.2f",s.id,s.name,s.gpa);\n    return 0;\n}`},
+  {id:'s5',t:'Nested Structure (DOB)',p:'medium',h:`struct Date{int d,m,y;};\nstruct Student{char name[50];struct Date dob;};\nAccess: s.dob.d, s.dob.m, s.dob.y`,s:`#include<stdio.h>\nstruct Date{int d,m,y;};\nstruct Student{char name[50];struct Date dob;};\nint main(){\n    struct Student s;\n    printf("Name: "); scanf("%s",s.name);\n    printf("DOB d m y: "); scanf("%d %d %d",&s.dob.d,&s.dob.m,&s.dob.y);\n    printf("%s born %d/%d/%d",s.name,s.dob.d,s.dob.m,s.dob.y);\n    return 0;\n}`},
+  {id:'s6',t:'Array via Pointer',p:'medium',h:`int *p=arr;  // p points to arr[0]\n*(p+i) == arr[i]\nfor loop using *(p+i) instead of arr[i]`,s:`#include<stdio.h>\nint main(){\n    int arr[5],i; int *p=arr;\n    printf("5 numbers: ");\n    for(i=0;i<5;i++) scanf("%d",p+i);\n    printf("Via pointer: ");\n    for(i=0;i<5;i++) printf("%d ",*(p+i));\n    return 0;\n}`},
+]};
+
+const VIVA=[
+  {q:"What is the difference between = and == in C?",d:"easy",a:"= is the assignment operator — assigns a value to a variable (a = 5 stores 5 in a).\n== is the comparison operator — checks if two values are equal, returns true or false.\n\nCommon mistake: if(a = 5) — this assigns 5 to a (always true!). Correct: if(a == 5)."},
+  {q:"What is the difference between if-else and switch?",d:"easy",a:"if-else: Can check any condition — ranges (>=90), expressions, floats, strings.\nswitch: Can only check EXACT values of int or char. Cannot check ranges or float.\n\nswitch is cleaner for many exact value checks (like a menu). if-else is more flexible."},
+  {q:"What happens if break is missing in switch?",d:"easy",a:"Execution 'falls through' — the next case also runs automatically, even if it doesn't match.\nExample: case 1 without break → case 2 also executes.\nSometimes used intentionally: case 'a': case 'e': case 'i': all share same vowel handler."},
+  {q:"What is the difference between while and do-while?",d:"easy",a:"while: Checks condition BEFORE body. If false from start → body never runs.\ndo-while: Checks condition AFTER body. Body runs at LEAST ONCE.\n\nUse do-while for menu-driven programs where menu must show at least once."},
+  {q:"What is break and continue?",d:"easy",a:"break: Immediately exits the loop or switch. Execution continues after the loop block.\nUsed in prime check — once divisor found, break.\n\ncontinue: Skips the rest of current iteration, goes to next iteration.\nUsed to skip specific values — if(i%2==0) continue; skips even numbers."},
+  {q:"What is an array? Why use it?",d:"easy",a:"An array stores multiple values of the SAME data type in contiguous memory.\nInstead of int a1,a2,...,a100 — use int arr[100]. Process all with a loop.\n\nKey: All elements are same type. Indexed from 0 to n-1."},
+  {q:"What is a function? Why use it?",d:"easy",a:"A function is a named block of code that does one specific task. Input via parameters, output via return.\n\nReasons: Reusability (write once, call many times), modularity, readability, easier debugging."},
+  {q:"What is the difference between call by value and call by reference?",d:"med",a:"Call by Value: A COPY is passed. Changes inside function don't affect original.\nExample: void swap(int a, int b) — originals unchanged.\n\nCall by Reference: ADDRESS is passed via pointers. Changes affect original.\nExample: void swap(int *a, int *b) — call with swap(&x, &y).\n\nMemory analogy: Value = photocopy (safe), Reference = original document (changes stick)."},
+  {q:"What is recursion? What are its two essential parts?",d:"med",a:"Recursion = a function calling itself to solve smaller version of same problem.\n\nTwo ESSENTIAL parts:\n1. Base Case — when to STOP (e.g., if n==0 return 1). Without this → infinite recursion → crash!\n2. Recursive Call — calling itself with smaller input (e.g., return n * factorial(n-1)).\n\nExample: factorial(5) = 5 × factorial(4) = 5×4×3×2×1 = 120"},
+  {q:"What is a pointer? Explain with example.",d:"med",a:"A pointer stores the MEMORY ADDRESS of another variable — not the value itself.\n\nint x = 10;\nint *p = &x;  // p stores address of x\n\n&x = address of x\n*p = value at that address = 10\n*p = 99 → changes x to 99!\n\nKey symbols: & (address-of), * (dereference), int *p (pointer declaration)"},
+  {q:"What is a structure? How different from array?",d:"med",a:"Structure: Groups DIFFERENT data types under one name.\nstruct Student { int roll; char name[50]; float marks; };\n\nVs Array:\n- Array: Same type, many values (int arr[100])\n- Struct: Different types, one record\n\nAccess via dot operator: s1.roll, s1.marks"},
+  {q:"What is typedef in C?",d:"med",a:"typedef creates an alias for an existing type, making code cleaner.\n\nWithout: struct Student s;  (must write 'struct' every time)\nWith typedef struct { ... } Student;  → Student s;  (clean!)\n\nAlso used for: typedef int Integer; — now Integer works like int."},
+  {q:"What is scope and lifetime of a variable?",d:"med",a:"Scope = WHERE the variable can be accessed.\nLifetime = HOW LONG it exists in memory.\n\nLocal: Inside function only. Created when function runs, destroyed when it returns.\nGlobal: Outside all functions. Accessible everywhere. Lives for entire program.\nParameter: Inside function only. Lives during function execution."},
+  {q:"What is bubble sort? Time complexity?",d:"med",a:"Bubble sort compares adjacent elements and swaps if out of order. Largest element 'bubbles' to end each pass.\n\nfor i=0 to n-2: (n-1 passes)\n  for j=0 to n-i-2:\n    if arr[j]>arr[j+1]: swap\n\nTime complexity: O(n²) worst/average, O(n) best case (already sorted).\nGood for: Small arrays, learning sorting concepts."},
+  {q:"Difference between strlen and sizeof for strings?",d:"med",a:"strlen(s): Length of string — characters EXCLUDING null terminator '\\0'.\nstrlen(\"hello\") = 5\n\nsizeof(s): Bytes of the variable — includes everything.\nchar s[50]=\"hello\"; sizeof(s) = 50 (array size)\n\nUse strlen for string length, sizeof for memory size."},
+  {q:"What is null character '\\0'? Why important?",d:"med",a:"'\\0' (null character, ASCII 0) marks the END of a string in C.\n\nAll string functions (strlen, printf %s, strcpy) scan character by character until '\\0'.\nWithout it: printf keeps printing garbage past the string.\n\nchar s[] = \"hello\" stores: h e l l o '\\0' — C adds it automatically.\nArray must be at least length+1 to fit null terminator!"},
+  {q:"What is nested structure?",d:"med",a:"A structure inside another structure.\n\nstruct Date { int d, m, y; };\nstruct Student { char name[50]; struct Date dob; };\n\nAccess: student.dob.d, student.dob.m, student.dob.y\n\nUseful when an entity has a complex attribute — student's date of birth has day, month, year."},
+  {q:"What happens if you access arr[n] in C?",d:"hard",a:"C does NOT check array bounds — undefined behavior.\narr[n] (valid: 0 to n-1) → out of bounds:\n- May read garbage values from adjacent memory\n- May corrupt other variables or program data\n- May crash with segmentation fault\n- May silently give wrong results\n\nAlways ensure loop indices stay 0 to n-1!"},
+  {q:"Why must recursion have a base case?",d:"hard",a:"Without base case → infinite recursion.\nEach call uses stack memory (stack frame — local vars, return address).\nWithout base case → stack fills completely → Stack Overflow → crash!\n\nint f(int n) { return n * f(n-1); }  // no base case → crashes!\n\nBase case = the exit door from recursion."},
+  {q:"Difference between ++i and i++ in loop?",d:"hard",a:"++i (pre-increment): Increments first, then returns new value.\ni++ (post-increment): Returns current value first, then increments.\n\nIn for loop header 'i++' vs '++i': SAME result — return value not used.\n\nDifference in expressions:\nint j = ++i;  // i incremented, j gets new value\nint j = i++;  // j gets old value, then i increments"},
+  {q:"Why no & with scanf for strings?",d:"hard",a:"Array name in C automatically decays to pointer to first element — it's already an address!\nscanf(\"%s\", name) — name IS the address.\n\nAdding & would give address of the pointer → wrong!\n\nBut scalars need &: scanf(\"%d\", &n) — n is NOT a pointer."},
+  {q:"Can we return multiple values from a function?",d:"hard",a:"No — C functions can only return ONE value via return.\n\nWorkarounds:\n1. Pass pointers: void getMinMax(int arr[], int n, int *min, int *max) — store in pointed vars\n2. Return a struct: all values in struct, return struct\n3. Global variables (bad practice)\n\nBest: Use pointers — pass addresses, function writes results there."},
+  {q:"What is pointer arithmetic?",d:"hard",a:"Pointer incremented by sizeof(type) bytes — not 1 byte.\n\nint arr[] = {10,20,30};\nint *p = arr;  // points to arr[0] at say address 1000\np+1 → 1004 (arr[1])  // int = 4 bytes\np+2 → 1008 (arr[2])\n*(p+i) == arr[i]  // equivalent!\n\nArray indexing IS pointer arithmetic internally."},
+  {q:"What is stack overflow in recursion?",d:"hard",a:"Each function call creates a stack frame — memory for local vars, params, return address.\nIf recursion goes too deep (no base case, or never reaches it), thousands of frames accumulate.\nStack memory exhausts → Stack Overflow → program crashes.\n\nFix: Always have correct base case AND ensure recursive call moves toward it (n decreasing to 0)."},
+  {q:"What does int main() return and why?",d:"med",a:"int main() returns an integer to the operating system.\nreturn 0; means program ran SUCCESSFULLY.\nAny non-zero value means an ERROR occurred.\n\nThe OS can check this return value. That's why main() is int, not void.\nvoid main() works in Dev C++ but is technically incorrect — int main() is the standard."},
+  {q:"What is the output of 5/2 in C?",d:"hard",a:"Output: 2\n\nBoth 5 and 2 are integers → integer division → truncates decimal.\n5/2 = 2.5 but stored as integer = 2 (no rounding!).\n\nTo get 2.5: printf(\"%.1f\", 5.0/2) or (float)5/2\nThis is a common source of bugs!"},
+  {q:"Why can't we use = to copy strings?",d:"hard",a:"char s1[]=\"hello\";\nchar s2[10];\ns2 = s1;  // WRONG! Compilation error!\n\nWhy: Array names are constant pointers — can't change what they point to.\n\nCorrect: strcpy(s2, s1);  // copies char by char including \\0\n\n= only works for single chars: char c = 'a'; is fine."},
+  {q:"Recursive vs iterative Fibonacci — which is faster?",d:"hard",a:"Iterative: O(n) time, O(1) space — fast, single pass.\nRecursive: O(2ⁿ) time — exponential! Very slow for large n.\n\nWhy recursive is slow: Each call branches into two more calls.\nfib(5) recalculates fib(3) multiple times — lots of redundant work.\n\nExam asks recursive to test recursion concept — not for efficiency."},
+  {q:"What is a 2D array? How stored in memory?",d:"hard",a:"2D array = array of arrays. Declared as int mat[3][4]; — 3 rows, 4 cols.\nAccess: mat[i][j]\n\nMemory: Row-major order — all of row 0, then row 1, then row 2, contiguously.\nmat[0][0] mat[0][1] mat[0][2] mat[0][3] mat[1][0] ...\n\nTotal elements: rows × cols = 12 integers."},
+  {q:"Difference between local and global variables?",d:"hard",a:"Local: Declared inside function. Accessible only there. Created on stack, destroyed on return.\nGlobal: Declared outside all functions. Accessible everywhere. Exists entire program.\n\nBetter to use LOCAL:\n1. No naming conflicts\n2. Saves memory (local dies when function exits)\n3. Easier to debug\n4. Better modularity\n\nUse global only when truly necessary (shared constants)."},
+];
+
+// ════ STATE ════
+const sv=new Set(JSON.parse(localStorage.getItem('pps4')||'[]'));
+function save(){localStorage.setItem('pps4',JSON.stringify([...sv]));}
+
+// ════ NAVIGATION ════
+function go(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+
+// ════ RENDER PROBLEMS ════
+function renderProbs(topic,cid){
+  const probs=PROBS[topic];
+  document.getElementById(cid).innerHTML=probs.map((p,i)=>{
+    const s=sv.has(p.id);
+    const tc=p.p==='fire'?'tag-f':p.p==='high'?'tag-h':'tag-m';
+    const tl=p.p==='fire'?'🔥 Must Do':p.p==='high'?'⭐ High':'◦ Possible';
+    return `<div class="prob${s?' solved':''}" id="pr-${p.id}">
+      <div class="prob-top" onclick="toggleProb('${p.id}')">
+        <span class="prob-n">${String(i+1).padStart(2,'0')}</span>
+        <span class="prob-ttl">${p.t}</span>
+        <span class="prob-tag ${tc}">${tl}</span>
+        <span class="prob-sv">✓ solved</span>
+        <span class="prob-ch">▶</span>
+      </div>
+      <div class="prob-body">
+        <div class="ptabs">
+          <button class="ptab active" onclick="swPTab('${p.id}','h',this)">Hint</button>
+          <button class="ptab" onclick="swPTab('${p.id}','s',this)">Solution</button>
+          <button class="ptab" onclick="loadIntoCompiler('${p.id}')">⚡ Open in Compiler</button>
+        </div>
+        <div class="ptc active" id="ph-${p.id}"><div class="phint">${p.h}</div></div>
+        <div class="ptc" id="ps-${p.id}"><div class="psol">${p.s.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>
+        <button class="pbtn" onclick="markSv('${p.id}','${topic}')">${s?'↩ Unsolved':'✓ Mark Solved'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleProb(id){document.getElementById('pr-'+id).classList.toggle('open');}
+
+function swPTab(pid,tab,btn){
+  document.getElementById('ph-'+pid).classList.toggle('active',tab==='h');
+  document.getElementById('ps-'+pid).classList.toggle('active',tab==='s');
+  btn.closest('.ptabs').querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function markSv(id,topic){
+  if(sv.has(id)) sv.delete(id); else sv.add(id);
+  save(); renderProbs(topic,'pl-'+topic); updateProg();
+}
+
+function loadIntoCompiler(id){
+  const p=Object.values(PROBS).flat().find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('editor').value=p.s;
+  updateHL(); updateLN();
+  go('compiler',null);
+  document.querySelectorAll('.sb-item').forEach(n=>{
+    if(n.textContent.includes('Compiler')) n.classList.add('active');
+    else n.classList.remove('active');
+  });
+}
+
+// ════ RENDER VIVA ════
+function renderViva(){
+  document.getElementById('viva-list').innerHTML=VIVA.map((v,i)=>{
+    const dc=v.d==='easy'?'vd-e':v.d==='med'?'vd-m':'vd-h';
+    return `<div class="vcard" id="vc-${i}">
+      <div class="vcard-q" onclick="toggleViva(${i})">
+        <span class="vcard-n">${String(i+1).padStart(2,'0')}</span>
+        <span class="vcard-txt">${v.q}</span>
+        <span class="vd ${dc}">${v.d}</span>
+      </div>
+      <div class="vcard-ans"><div class="vans-txt">${v.a}</div></div>
+    </div>`;
+  }).join('');
+}
+function toggleViva(i){document.getElementById('vc-'+i).classList.toggle('open');}
+
+// ════ PROGRESS ════
+function updateProg(){
+  const total=33, s=sv.size;
+  document.getElementById('s-sv').textContent=s;
+  document.getElementById('prog-txt').textContent=s+'/'+total;
+  document.getElementById('prog-fill').style.width=Math.round(s/total*100)+'%';
+  const topics={ifelse:7,loops:7,arrays:7,func:6,struct:6};
+  Object.entries(topics).forEach(([t,mx])=>{
+    const cnt=PROBS[t].filter(p=>sv.has(p.id)).length;
+    const el=document.getElementById('b-'+t);
+    if(el){el.textContent=cnt+'/'+mx;el.className='sb-badge'+(cnt===mx?' done':'');}
+  });
+}
+
+// ════ COMPILER ════
+const TEMPLATE=`#include<stdio.h>
+
+int main() {
+    // Write your solution here
+    
+    return 0;
+}`;
+
+function loadTemplate(){document.getElementById('editor').value=TEMPLATE;updateHL();updateLN();}
+function clearEditor(){document.getElementById('editor').value='';document.getElementById('output').innerHTML='<span class="out-placeholder">// Output will appear here after clicking Run</span>';updateHL();updateLN();}
+
+async function runCode(){
+  const code=document.getElementById('editor').value.trim();
+  const input=document.getElementById('stdin').value;
+  if(!code){document.getElementById('output').textContent='// Write some code first!';return;}
+  const btn=document.getElementById('run-btn');
+  btn.disabled=true; btn.classList.add('loading');
+  const out=document.getElementById('output');
+  out.className='output-body'; out.textContent='Running...';
+  try{
+    const res=await fetch('https://emkc.org/api/v2/piston/execute',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({language:'c',version:'*',files:[{name:'main.c',content:code}],stdin:input,run_timeout:5000})
+    });
+    const data=await res.json();
+    if(data.run){
+      const stdout=data.run.stdout||'';
+      const stderr=data.run.stderr||'';
+      const code_=data.run.code;
+      if(stderr&&!stdout){
+        out.className='output-body error'; out.textContent=stderr;
+      } else {
+        out.className='output-body success';
+        out.textContent=stdout+(stderr?'\n[stderr]: '+stderr:'');
+        if(!stdout&&code_!==0){out.className='output-body error';out.textContent=stderr||'Runtime error';}
+      }
+    } else {
+      out.className='output-body error'; out.textContent=JSON.stringify(data,null,2);
+    }
+  } catch(e){
+    out.className='output-body error';
+    out.textContent='Network error — check internet connection.\n'+e.message;
+  }
+  btn.disabled=false; btn.classList.remove('loading');
+}
+
+// ════ SYNTAX HIGHLIGHT ════
+function highlight(code){
+  return code
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/(\/\/[^\n]*)/g,'<span class="cm">$1</span>')
+    .replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,'<span class="st">$1</span>')
+    .replace(/(#\w+)/g,'<span class="pp">$1</span>')
+    .replace(/\b(int|float|char|void|return|if|else|for|while|do|switch|case|break|continue|default|struct|typedef|const|unsigned|long|short|double)\b/g,'<span class="kw">$1</span>')
+    .replace(/\b(printf|scanf|strlen|strcpy|strcmp|strcat|pow|sqrt|abs|main|malloc|free)\b/g,'<span class="fn">$1</span>')
+    .replace(/\b(\d+\.?\d*)\b/g,'<span class="nm">$1</span>');
+}
+
+const ed=document.getElementById('editor');
+const hl=document.getElementById('codehl');
+
+function updateHL(){hl.innerHTML=highlight(ed.value)+'\n';}
+function updateLN(){
+  const lines=ed.value.split('\n').length;
+  document.getElementById('lnums').textContent=Array.from({length:lines},(_,i)=>i+1).join('\n');
+}
+
+ed.addEventListener('input',()=>{updateHL();updateLN();acIndex=-1;showAC();});
+ed.addEventListener('scroll',()=>{hl.scrollTop=ed.scrollTop;hl.scrollLeft=ed.scrollLeft;document.getElementById('lnums').scrollTop=ed.scrollTop;});
+
+// ════ AUTOCOMPLETE ════
+const AC=[
+  {l:'#include<stdio.h>',k:'hd',d:'standard I/O'},{l:'#include<string.h>',k:'hd',d:'string functions'},{l:'#include<math.h>',k:'hd',d:'math functions'},
+  {l:'int',k:'kw',d:'integer type'},{l:'float',k:'kw',d:'float type'},{l:'char',k:'kw',d:'char type'},{l:'void',k:'kw',d:'no return'},{l:'return',k:'kw',d:'return value'},
+  {l:'if',k:'kw',d:'conditional'},{l:'else',k:'kw',d:'else branch'},{l:'for',k:'kw',d:'for loop'},{l:'while',k:'kw',d:'while loop'},{l:'switch',k:'kw',d:'switch'},{l:'case',k:'kw',d:'case'},{l:'break',k:'kw',d:'break'},{l:'continue',k:'kw',d:'continue'},{l:'default',k:'kw',d:'default'},{l:'struct',k:'kw',d:'structure'},{l:'typedef',k:'kw',d:'type alias'},
+  {l:'printf',k:'fn',d:'printf("fmt",...)'},{l:'scanf',k:'fn',d:'scanf("fmt",&var)'},{l:'strlen',k:'fn',d:'strlen(str)'},{l:'strcpy',k:'fn',d:'strcpy(d,s)'},{l:'strcmp',k:'fn',d:'strcmp(s1,s2)'},{l:'pow',k:'fn',d:'pow(base,exp)'},{l:'sqrt',k:'fn',d:'sqrt(x)'},
+  {l:'int main() {\n    \n    return 0;\n}',k:'sn',d:'main template'},{l:'for(i=0; i<n; i++) {\n    \n}',k:'sn',d:'for loop'},{l:'printf("")',k:'sn',d:'print'},{l:'scanf("%d", &)',k:'sn',d:'scan int'},
+];
+let acIdx=-1,acMs=[],acVis=false;
+
+function getWord(){
+  const before=ed.value.substring(0,ed.selectionStart);
+  const m=before.match(/[\w#<]+$/); return m?m[0]:'';
+}
+
+function showAC(){
+  const w=getWord();
+  if(w.length<1){hideAC();return;}
+  acMs=AC.filter(a=>a.l.toLowerCase().startsWith(w.toLowerCase())&&a.l!==w).slice(0,10);
+  if(!acMs.length){hideAC();return;}
+  const rect=ed.getBoundingClientRect();
+  const before=ed.value.substring(0,ed.selectionStart);
+  const lines=before.split('\n');
+  const lh=12.5*1.75;
+  const top=rect.top+12+lines.length*lh-ed.scrollTop;
+  const cw=7.5;
+  const left=rect.left+58+lines[lines.length-1].length*cw-ed.scrollLeft;
+  const drop=document.getElementById('acdrop');
+  drop.innerHTML=acMs.map((a,i)=>{
+    const kc={kw:'ak-kw',fn:'ak-fn',sn:'ak-sn',hd:'ak-hd'}[a.k]||'ak-kw';
+    const kl={kw:'K',fn:'f',sn:'S',hd:'H'}[a.k]||'K';
+    return `<div class="ac-item${i===acIdx?' sel':''}" onmousedown="acceptAC(${i})"><span class="ac-k ${kc}">${kl}</span><span class="ac-lbl">${a.l.split('\n')[0]}</span><span class="ac-det">${a.d}</span></div>`;
+  }).join('');
+  drop.style.cssText=`display:block;top:${Math.min(top,window.innerHeight-200)}px;left:${Math.min(left,window.innerWidth-230)}px`;
+  acVis=true;
+}
+
+function hideAC(){document.getElementById('acdrop').style.display='none';acVis=false;acIdx=-1;}
+
+function acceptAC(i){
+  const item=acMs[i]; const w=getWord();
+  const pos=ed.selectionStart; const ins=item.l;
+  ed.value=ed.value.substring(0,pos-w.length)+ins+ed.value.substring(pos);
+  ed.selectionStart=ed.selectionEnd=pos-w.length+ins.length;
+  hideAC(); updateHL(); updateLN();
+}
+
+ed.addEventListener('keydown',e=>{
+  if(acVis){
+    if(e.key==='ArrowDown'){e.preventDefault();acIdx=Math.min(acIdx+1,acMs.length-1);showAC();}
+    else if(e.key==='ArrowUp'){e.preventDefault();acIdx=Math.max(acIdx-1,-1);showAC();}
+    else if(e.key==='Tab'||e.key==='Enter'){
+      if(acIdx>=0){e.preventDefault();acceptAC(acIdx);return;}
+      if(e.key==='Tab'&&acMs.length){e.preventDefault();acceptAC(0);return;}
+      hideAC();
+    } else if(e.key==='Escape'){e.preventDefault();hideAC();return;}
+  }
+  if(e.key==='Tab'&&!acVis){
+    e.preventDefault();
+    const s=ed.selectionStart;
+    ed.value=ed.value.substring(0,s)+'    '+ed.value.substring(ed.selectionEnd);
+    ed.selectionStart=ed.selectionEnd=s+4;
+    updateHL(); updateLN();
+  }
+});
+ed.addEventListener('click',()=>{hideAC();});
+ed.addEventListener('blur',()=>setTimeout(hideAC,150));
+
+// Ctrl+Enter to run
+ed.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();runCode();}});
+
+// ════ INIT ════
+Object.entries({ifelse:'pl-ifelse',loops:'pl-loops',arrays:'pl-arrays',func:'pl-func',struct:'pl-struct'}).forEach(([t,id])=>renderProbs(t,id));
+renderViva();
+updateProg();
+loadTemplate();
+</script>
+</body>
+</html>
